@@ -1,4 +1,4 @@
-this project consists of 4 folders:
+This project consists of 4 folders:
 
 	raw contains: raw dataset and master do file 
 	build contains: dataset and do files to clear the data for the analyses 
