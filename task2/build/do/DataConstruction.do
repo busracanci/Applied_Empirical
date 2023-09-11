@@ -11,7 +11,7 @@
 set more off
 clear all
 
-global path "C:\Users\buca4591\Desktop\2nd year\applied\busra_canci\task2"
+global path "C:\Users\buca4591\Desktop\GIT\Applied_Empirical\task2"
 	
 cd "$path"
 
