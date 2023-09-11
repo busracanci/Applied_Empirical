@@ -1,0 +1,26 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{8}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
+\hline
+Years of education  &       0.057&       0.055&       0.057&       0.095&       0.052&       0.957&       0.052&       0.078\\
+                    &     (0.000)&     (0.014)&     (0.000)&     (0.022)&     (0.000)&     (0.066)&     (0.000)&     (0.024)\\
+Race (1 = black)    &            &            &            &            &      -0.211&       1.189&      -0.211&      -0.179\\
+                    &            &            &            &            &     (0.003)&     (0.083)&     (0.003)&     (0.030)\\
+SMSA (1 = center city)&            &            &            &            &      -0.142&       0.877&      -0.142&      -0.118\\
+                    &            &            &            &            &     (0.002)&     (0.061)&     (0.002)&     (0.022)\\
+Married (1 = married)&            &            &            &            &       0.245&       0.022&       0.244&       0.245\\
+                    &            &            &            &            &     (0.002)&     (0.011)&     (0.002)&     (0.003)\\
+Age (quarterly)     &            &            &       0.180&       0.133&            &            &       0.152&       0.121\\
+                    &            &            &     (0.039)&     (0.049)&            &            &     (0.038)&     (0.048)\\
+Age-squared         &            &            &      -0.002&      -0.002&            &            &      -0.002&      -0.001\\
+                    &            &            &     (0.001)&     (0.001)&            &            &     (0.001)&     (0.001)\\
+\hline
+Number of Observations&     486,926&     486,926&     486,926&     486,926&     486,926&     486,926&     486,926&     486,926\\
+9 year-of-birth dummies&         Yes&         Yes&         Yes&         Yes&         Yes&         Yes&         Yes&         Yes\\
+8 Region of residence dummies&          No&         Yes&          No&         Yes&          No&         Yes&          No&         Yes\\
+$\chi^2$            &            &    6921.051&            &    6736.813&            &    2126.858&            &   36292.289\\
+\hline\hline
+\end{tabular}
+}

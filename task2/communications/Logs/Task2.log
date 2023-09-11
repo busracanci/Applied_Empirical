@@ -1,0 +1,2370 @@
+-----------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\buca4591\Desktop\2nd year\applied\busra_canci\task2\communica
+> tions/Logs/Task2.log
+  log type:  text
+ opened on:   9 Sep 2023, 23:04:35
+
+.         
+.         ** SET BUILD AND ANALYSIS PATH
+.         global b        "build/do" 
+
+.         global a        "analysis/do"
+
+.         
+.         
+.         **** TASK 2A
+.         * Normalize dateset
+.         do "$b/DataConstruction.do"
+
+. * ==============================================================================
+. *
+. * Title                         : AK91 Replication
+. * Modified by           : Busra Canci
+. * Stata version         : 16
+. * Last modified         : 20230909
+. *
+. * ==============================================================================
+.         
+. 
+. set more off
+
+. clear all
+
+. 
+. global path "C:\Users\buca4591\Desktop\2nd year\applied\busra_canci\task2"
+
+.         
+. cd "$path"
+C:\Users\buca4591\Desktop\2nd year\applied\busra_canci\task2
+
+. 
+. global inputpath        "raw/data"
+
+. global outputpath       "analysis/data"
+
+.         
+. /* AK91 */
+.         
+.         ** UPLOAD DATA: ANGRIST & KRUEGER (1991)
+.         use "$inputpath/NEW7080.dta", clear
+
+.         
+.         ** RENAME VARIABLES
+.         rename v1 AGE
+
+.         rename v2 AGEQ
+
+.         rename v4 EDUC
+
+.         rename v5 ENOCENT
+
+.         rename v6 ESOCENT
+
+.         rename v9 LWKLYWGE
+
+.         rename v10 MARRIED
+
+.         rename v11 MIDATL
+
+.         rename v12 MT
+
+.         rename v13 NEWENG
+
+.         rename v16 CENSUS
+
+.         rename v18 QOB
+
+.         rename v19 RACE
+
+.         rename v20 SMSA
+
+.         rename v21 SOATL
+
+.         rename v24 WNOCENT
+
+.         rename v25 WSOCENT
+
+.         rename v27 YOB
+
+.         
+.         ** COHORT
+.         replace YOB = YOB-1900 if YOB >50 // I replace 1920s to 20s for xi purpos
+> e
+(247,199 real changes made)
+
+.         gen COHORT=2029
+
+.         replace COHORT=3039 if YOB<=39 & YOB >=30
+(329,509 real changes made)
+
+.         replace COHORT=4049 if YOB<=49 & YOB >=40
+(486,926 real changes made)
+
+.         replace AGEQ=AGEQ-1900 if CENSUS==80
+(816,435 real changes made)
+
+.         gen AGEQSQ= AGEQ*AGEQ
+
+.         
+.         ** GENERATE YOB DUMMIES
+.         foreach i of numlist 0/9 {
+  2.         
+.                 gen byte YR2`i' = YOB==2`i' | YOB==3`i' | YOB==4`i'
+  3.         
+.         }
+
+.         
+.         ** GENERATE QOB DUMMIES
+.         foreach i of numlist 1/4 {
+  2.         
+.                 gen byte QTR`i' = QOB==`i'
+  3.         
+.         }
+
+.         
+.         ** GENERATE YOB*QOB DUMMIES
+.         foreach i of numlist 1/3 {
+  2.                 foreach j of numlist 0/9 {
+  3.                 
+.                         gen QTR`i'2`j' = QTR`i'*YR2`j'
+  4.                         
+.                 }
+  5.         }
+
+.         
+.         ** LABELING VARIABLE USED IN THE TABLE 
+.         la var EDUC             "Years of education"
+
+.         la var RACE             "Race (1 = black)"
+
+.         la var SMSA             "SMSA (1 = center city)"
+
+.         la var MARRIED          "Married (1 = married)"
+
+.         la var AGEQ             "Age (quarterly)"
+
+.         la var AGEQSQ           "Age-squared"
+
+. 
+.         ** SAVING THE DATA FOR EACH COHORT
+.         local c2 "IV"
+
+.         local c3 "V"
+
+.         local c4 "VI"
+
+.         forval i = 2/4 {
+  2.         preserve
+  3.         keep if COHORT==`i'0`i'9
+  4.         save "$outputpath/Table`c`i''_Data.dta", replace 
+  5.         restore
+  6.         }
+(816,435 observations deleted)
+file analysis/data/TableIV_Data.dta saved
+(734,125 observations deleted)
+file analysis/data/TableV_Data.dta saved
+(576,708 observations deleted)
+file analysis/data/TableVI_Data.dta saved
+
+.         
+.         ** KEEP ONLY RELEVANT VARIABLES FOR VALUE REVIEW AND REGRESSION
+.         keep AGE AGEQ EDUC ENOCENT ESOCENT LWKLYWGE MARRIED MIDATL MT ///
+>                  NEWENG CENSUS QOB RACE SMSA SOATL WNOCENT WSOCENT COHORT AGEQSQ 
+> ///
+>                  YR* QTR*
+
+.         
+.         ** VARIABLE LABELING
+.         la var AGE                      "Age"
+
+.         la var ENOCENT          "En 0 cent"
+
+.         la var ESOCENT          "Es 0 cent"
+
+.         la var LWKLYWGE         "Log weekly wage"
+
+.         la var NEWENG           "New Eng"
+
+.         la var CENSUS           "Census"
+
+.         la var QOB                      "Quarter of birth"
+
+.         la var WNOCENT          "Wn 0 cent"
+
+.         la var WSOCENT          "Ws 0 cent"
+
+.         la var COHORT           "Cohort"
+
+.         
+.         ** SAVING FULL SAMPLE DATSET
+.         save "$outputpath/AK91_Data.dta", replace 
+file analysis/data/AK91_Data.dta saved
+
+.         
+. 
+. /* AL99 */
+. 
+.         ** VARIABLE RENAMING AND LABELING OF ANGRIST AND LAVY (1999) DATA
+.                 
+.         
+.         forval i = 4/5 {
+  2.         
+.         use "$inputpath/final`i'.dta", clear
+  3.         
+.         ** KEEP ONLY RELEVANT VARIABLES FOR VALUE REVIEW
+.         keep c_size c_boys c_girls c_num`i'rd c_type ///
+>                  flgrm`i' mrkgrm`i' ngrm`i' flmth`i' mrkmth`i' nmth`i' ///
+>                  grade cohsize mathsize avgmath passmath verbsize avgverb passver
+> b
+  4.         
+.         ** CORRECTING VALUES OF VARIABLES
+.         replace avgverb= avgverb-100 if avgverb>100
+  5.         replace avgmath= avgmath-100 if avgmath>100
+  6. 
+.         replace avgverb=. if verbsize==0
+  7.         replace passverb=. if verbsize==0
+  8. 
+.         replace avgmath=. if mathsize==0
+  9.         replace passmath=. if mathsize==0
+ 10.         
+.         ** VARIABLE RENAMING
+.         foreach var in flgrm mrkgrm ngrm flmth mrkmth nmth {
+ 11.                 rename `var'`i' `var'
+ 12.         }
+ 13.         
+.         ** VARIABLE LABELING
+.         la var c_size           "Class size"
+ 14.         la var c_boys           "Number of boys in class"
+ 15.         la var c_girls          "Number of firls in class"
+ 16.         la var c_num`i'rd       "Number 4th grade classes in school"
+ 17.         la var c_type           "Number of special education classes"
+ 18.         la var flgrm            "\% failer in grammar"
+ 19.         la var mrkgrm           "Mean mark in grammar"
+ 20.         la var ngrm             "Number of pupils in grammar class"
+ 21.         la var flmth            "\% failer in math"
+ 22.         la var mrkmth           "Mean mark in math"
+ 23.         la var nmth             "Number of pupils in math class"
+ 24.         la var grade            "Class grade"
+ 25.         la var cohsize          "Cohort size"
+ 26.         la var mathsize         "Number tested mathematics"
+ 27.         la var avgmath          "Mathematic score"
+ 28.         la var passmath         "Pass mathematic test"
+ 29.         la var verbsize         "Number tested reading"
+ 30.         la var avgverb          "Grammar score"
+ 31.         la var passverb         "Pass grammar test"
+ 32.         
+.         
+.         save "$outputpath/AL99_Grade`i'_Data.dta", replace 
+ 33. 
+.         }
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+file analysis/data/AL99_Grade4_Data.dta saved
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made, 1 to missing)
+(1 real change made, 1 to missing)
+file analysis/data/AL99_Grade5_Data.dta saved
+
+.         
+.         *** END OF DO FILE ***
+. 
+end of do-file
+
+.         * Install the program
+.         do "$b/Programs.do"
+
+. * ==============================================================================
+. *
+. * Title                         : AK91 Replication
+. * Modified by           : Busra Canci
+. * Stata version         : 16
+. * Last modified         : 20230909
+. *
+. * ==============================================================================
+. 
+. *** PROGRAM FOR VALUE REVIEW
+. 
+. * Syntax: valuereview using [filename], numericfile([filename])
+. * Output: summary statistics of byte and float variables, and tabulation 
+. *                 of string and interger variable (please see this in log file in
+> stead)
+. 
+. cap program drop valuereview
+
+. program valuereview
+  1.         
+.         syntax using/, numericfile(string) 
+  2.         use "`using/'", clear
+  3.         
+.         cap drop YR* QTR* // specifically for AK91
+  4.         
+.         eststo clear
+  5.         ds, has(type numeric)
+  6.         cap confirm variable `r(varlist)'
+  7.         if _rc == 0 eststo: qui estpost sum `r(varlist)', det
+  8.         
+.         esttab using "`numericfile'", replace ///
+>                 cell("mean(fmt(2)) min max p50(fmt(2)) sd(fmt(2))") ///
+>                 collabel("Mean" "Min" "Max" "Median" "SD") ///
+>                 label noobs
+  9.         eststo clear 
+ 10.         
+.         ds, has(type int)
+ 11.         cap confirm variable `r(varlist)'
+ 12.         if _rc == 0 foreach var of varlist `r(varlist)' {
+ 13.                 tab `var'
+ 14.         }
+ 15.         ds, has(type string)
+ 16.         cap confirm variable `r(varlist)'
+ 17.         if _rc == 0 foreach var of varlist `r(varlist)' {
+ 18.                 tab `var'
+ 19.         }
+ 20.         
+. end
+
+. 
+. 
+. *** PROGRAM FOR REGRESSION ANALYSIS AND TABLE OUTPUT
+. 
+. * Syntax: olsregression [varlist] [if], storename([anyname])
+. * Output: regression with heteroskedasticity robust standard error, stored
+. *                 in unique name for table output
+. 
+. cap program drop olsregression
+
+. program  olsregression
+  1.         syntax anything [if], storename(name)
+  2.         eststo `storename': reg `anything', robust
+  3. end
+
+. 
+. * Syntax: latexoutputtable [varlist] using [filename], storename([anyname])
+. * Output: latex table specialized in keeping only relevant variable and 
+. *                 can be ordered accordingly using the storage name from olsregre
+> ssion
+. *                 program
+. 
+. cap program drop latexoutputtable
+
+. program  latexoutputtable
+  1.         syntax varlist using/, storename(string)
+  2.         esttab `storename' using "`using/'", ///
+>         keep(`varlist') order(`varlist') ///
+>         label  collabels(none) mlabels(, none) starlevels(* 0.10 ** 0.05 *** 0.01
+> )  ///
+>         cells(b(fmt(3)) se(fmt(3) par)) style(tex) stats(N r2, labels("Number of 
+> Observations" "R-squared") fmt(%9.0fc 3)) ///
+>         replace
+  3.         eststo clear
+  4. end
+
+. 
+. *** END OF DO FILE ***
+. 
+end of do-file
+
+.         * Value review
+.         do "$a/ValueReview.do"
+
+. * ==============================================================================
+. *
+. * Title                         : AK91 Replication
+. * Modified by           : Busra Canci
+. * Stata version         : 16
+. * Last modified         : 20230909
+. *
+. * ==============================================================================
+.         
+. 
+. set more off
+
+. clear all
+
+. 
+. global path "C:\Users\buca4591\Desktop\2nd year\applied\busra_canci\task2"
+
+.         
+. cd "$path"
+C:\Users\buca4591\Desktop\2nd year\applied\busra_canci\task2
+
+. 
+. global inputpath        "analysis/data" 
+
+. global outputpath       "analysis/results"
+
+. 
+.         ** INITIALLIZE PROGRAM
+.         do "build/do/Programs.do"
+
+. * ==============================================================================
+. *
+. * Title                         : AK91 Replication
+. * Modified by           : Busra Canci
+. * Stata version         : 16
+. * Last modified         : 20230909
+. *
+. * ==============================================================================
+. 
+. *** PROGRAM FOR VALUE REVIEW
+. 
+. * Syntax: valuereview using [filename], numericfile([filename])
+. * Output: summary statistics of byte and float variables, and tabulation 
+. *                 of string and interger variable (please see this in log file in
+> stead)
+. 
+. cap program drop valuereview
+
+. program valuereview
+  1.         
+.         syntax using/, numericfile(string) 
+  2.         use "`using/'", clear
+  3.         
+.         cap drop YR* QTR* // specifically for AK91
+  4.         
+.         eststo clear
+  5.         ds, has(type numeric)
+  6.         cap confirm variable `r(varlist)'
+  7.         if _rc == 0 eststo: qui estpost sum `r(varlist)', det
+  8.         
+.         esttab using "`numericfile'", replace ///
+>                 cell("mean(fmt(2)) min max p50(fmt(2)) sd(fmt(2))") ///
+>                 collabel("Mean" "Min" "Max" "Median" "SD") ///
+>                 label noobs
+  9.         eststo clear 
+ 10.         
+.         ds, has(type int)
+ 11.         cap confirm variable `r(varlist)'
+ 12.         if _rc == 0 foreach var of varlist `r(varlist)' {
+ 13.                 tab `var'
+ 14.         }
+ 15.         ds, has(type string)
+ 16.         cap confirm variable `r(varlist)'
+ 17.         if _rc == 0 foreach var of varlist `r(varlist)' {
+ 18.                 tab `var'
+ 19.         }
+ 20.         
+. end
+
+. 
+. 
+. *** PROGRAM FOR REGRESSION ANALYSIS AND TABLE OUTPUT
+. 
+. * Syntax: olsregression [varlist] [if], storename([anyname])
+. * Output: regression with heteroskedasticity robust standard error, stored
+. *                 in unique name for table output
+. 
+. cap program drop olsregression
+
+. program  olsregression
+  1.         syntax anything [if], storename(name)
+  2.         eststo `storename': reg `anything', robust
+  3. end
+
+. 
+. * Syntax: latexoutputtable [varlist] using [filename], storename([anyname])
+. * Output: latex table specialized in keeping only relevant variable and 
+. *                 can be ordered accordingly using the storage name from olsregre
+> ssion
+. *                 program
+. 
+. cap program drop latexoutputtable
+
+. program  latexoutputtable
+  1.         syntax varlist using/, storename(string)
+  2.         esttab `storename' using "`using/'", ///
+>         keep(`varlist') order(`varlist') ///
+>         label  collabels(none) mlabels(, none) starlevels(* 0.10 ** 0.05 *** 0.01
+> )  ///
+>         cells(b(fmt(3)) se(fmt(3) par)) style(tex) stats(N r2, labels("Number of 
+> Observations" "R-squared") fmt(%9.0fc 3)) ///
+>         replace
+  3.         eststo clear
+  4. end
+
+. 
+. *** END OF DO FILE ***
+. 
+end of do-file
+
+.         
+.         ** VALUE REVIEW USING PROGRAM
+.         valuereview using "$inputpath/AK91_Data.dta", numericfile("$outputpath/AK
+> 91_ValueReview.tex")
+AGE       ENOCENT   MARRIED   NEWENG    RACE      WNOCENT   AGEQSQ
+AGEQ      ESOCENT   MIDATL    CENSUS    SMSA      WSOCENT
+EDUC      LWKLYWGE  MT        QOB       SOATL     COHORT
+(est1 stored)
+(output written to analysis/results/AK91_ValueReview.tex)
+
+.         valuereview using "$inputpath/AL99_Grade4_Data.dta", numericfile("$output
+> path/AL99_Grade4_ValueReview.tex")
+c_size    c_num4rd  mrkgrm    mrkmth    cohsize   passmath  passverb
+c_boys    c_type    ngrm      nmth      mathsize  verbsize
+c_girls   flgrm     flmth     grade     avgmath   avgverb
+(est1 stored)
+(output written to analysis/results/AL99_Grade4_ValueReview.tex)
+c_size   c_boys   c_girls  ngrm     nmth     cohsize
+
+ Class size |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          8 |          2        0.10        0.10
+          9 |          1        0.05        0.15
+         10 |          1        0.05        0.19
+         11 |          2        0.10        0.29
+         12 |          5        0.24        0.53
+         13 |          2        0.10        0.63
+         14 |          6        0.29        0.92
+         15 |         12        0.58        1.51
+         16 |         10        0.49        1.99
+         17 |          6        0.29        2.28
+         18 |          7        0.34        2.62
+         19 |         12        0.58        3.21
+         20 |         18        0.87        4.08
+         21 |         15        0.73        4.81
+         22 |         16        0.78        5.59
+         23 |         15        0.73        6.31
+         24 |          9        0.44        6.75
+         25 |         12        0.58        7.33
+         26 |         11        0.53        7.87
+         27 |         10        0.49        8.35
+         28 |         11        0.53        8.89
+         29 |         11        0.53        9.42
+         30 |         13        0.63       10.05
+         31 |          9        0.44       10.49
+         32 |         10        0.49       10.98
+         33 |         13        0.63       11.61
+         34 |          8        0.39       12.00
+         35 |         11        0.53       12.53
+         36 |         13        0.63       13.16
+         37 |          3        0.15       13.31
+         38 |          6        0.29       13.60
+         39 |          7        0.34       13.94
+         40 |         10        0.49       14.42
+         41 |         15        0.73       15.15
+         42 |         21        1.02       16.17
+         43 |         31        1.51       17.68
+         44 |         17        0.83       18.50
+         45 |          9        0.44       18.94
+         46 |         20        0.97       19.91
+         47 |         30        1.46       21.37
+         48 |         23        1.12       22.49
+         49 |         24        1.17       23.65
+         50 |         19        0.92       24.58
+         51 |         28        1.36       25.93
+         52 |         12        0.58       26.52
+         53 |         17        0.83       27.34
+         54 |         26        1.26       28.61
+         55 |         24        1.17       29.77
+         56 |         32        1.55       31.33
+         57 |         14        0.68       32.01
+         58 |         24        1.17       33.17
+         59 |         12        0.58       33.75
+         60 |         24        1.17       34.92
+         61 |         18        0.87       35.79
+         62 |         14        0.68       36.47
+         63 |         21        1.02       37.49
+         64 |         28        1.36       38.85
+         65 |         31        1.51       40.36
+         66 |         30        1.46       41.82
+         67 |         22        1.07       42.88
+         68 |         18        0.87       43.76
+         69 |         20        0.97       44.73
+         70 |         30        1.46       46.19
+         71 |         22        1.07       47.26
+         72 |         24        1.17       48.42
+         73 |         14        0.68       49.10
+         74 |         34        1.65       50.75
+         75 |         22        1.07       51.82
+         76 |         17        0.83       52.65
+         77 |         22        1.07       53.72
+         78 |         26        1.26       54.98
+         79 |         10        0.49       55.46
+         80 |         24        1.17       56.63
+         81 |         14        0.68       57.31
+         82 |         17        0.83       58.14
+         83 |         17        0.83       58.96
+         84 |          9        0.44       59.40
+         85 |         17        0.83       60.22
+         86 |         18        0.87       61.10
+         87 |         26        1.26       62.36
+         88 |         17        0.83       63.19
+         89 |         11        0.53       63.72
+         90 |          8        0.39       64.11
+         91 |         31        1.51       65.61
+         92 |         21        1.02       66.63
+         93 |          9        0.44       67.07
+         94 |         36        1.75       68.82
+         95 |         27        1.31       70.13
+         96 |          9        0.44       70.57
+         97 |         30        1.46       72.03
+         98 |         18        0.87       72.90
+         99 |         18        0.87       73.77
+        100 |          6        0.29       74.07
+        101 |         18        0.87       74.94
+        102 |         27        1.31       76.25
+        103 |         12        0.58       76.83
+        104 |          6        0.29       77.12
+        105 |         12        0.58       77.71
+        106 |         14        0.68       78.39
+        107 |         21        1.02       79.41
+        108 |         15        0.73       80.14
+        109 |         12        0.58       80.72
+        110 |          6        0.29       81.01
+        111 |         18        0.87       81.88
+        112 |          3        0.15       82.03
+        113 |          3        0.15       82.18
+        114 |          6        0.29       82.47
+        115 |         30        1.46       83.92
+        116 |         12        0.58       84.51
+        117 |         19        0.92       85.43
+        118 |         20        0.97       86.40
+        119 |         18        0.87       87.28
+        120 |          9        0.44       87.71
+        121 |          3        0.15       87.86
+        122 |         10        0.49       88.34
+        123 |          7        0.34       88.68
+        124 |          8        0.39       89.07
+        125 |          6        0.29       89.36
+        126 |          3        0.15       89.51
+        127 |          8        0.39       89.90
+        128 |          7        0.34       90.24
+        129 |         11        0.53       90.77
+        130 |          3        0.15       90.92
+        131 |         10        0.49       91.40
+        132 |          4        0.19       91.60
+        133 |         23        1.12       92.71
+        135 |          8        0.39       93.10
+        136 |          8        0.39       93.49
+        137 |          4        0.19       93.69
+        138 |          8        0.39       94.07
+        139 |          4        0.19       94.27
+        142 |          4        0.19       94.46
+        143 |          4        0.19       94.66
+        146 |          4        0.19       94.85
+        148 |          4        0.19       95.05
+        149 |          8        0.39       95.43
+        150 |          8        0.39       95.82
+        152 |          4        0.19       96.02
+        155 |          8        0.39       96.41
+        156 |         12        0.58       96.99
+        158 |          4        0.19       97.18
+        159 |          4        0.19       97.38
+        160 |          4        0.19       97.57
+        167 |          5        0.24       97.81
+        169 |          4        0.19       98.01
+        172 |          9        0.44       98.45
+        173 |          8        0.39       98.83
+        189 |          6        0.29       99.13
+        210 |          6        0.29       99.42
+        213 |          6        0.29       99.71
+        225 |          6        0.29      100.00
+------------+-----------------------------------
+      Total |      2,059      100.00
+
+  Number of |
+    boys in |
+      class |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |         17        0.83        0.83
+          2 |          1        0.05        0.87
+          3 |          1        0.05        0.92
+          4 |          3        0.15        1.07
+          5 |          5        0.24        1.31
+          6 |         15        0.73        2.04
+          7 |          8        0.39        2.43
+          8 |         18        0.87        3.30
+          9 |         18        0.87        4.18
+         10 |         21        1.02        5.20
+         11 |         30        1.46        6.65
+         12 |         33        1.60        8.26
+         13 |         23        1.12        9.37
+         14 |         13        0.63       10.00
+         15 |         25        1.21       11.22
+         16 |         18        0.87       12.09
+         17 |         14        0.68       12.77
+         18 |         23        1.12       13.89
+         19 |         29        1.41       15.30
+         20 |         17        0.83       16.12
+         21 |         30        1.46       17.58
+         22 |         35        1.70       19.28
+         23 |         38        1.85       21.13
+         24 |         46        2.23       23.36
+         25 |         37        1.80       25.16
+         26 |         30        1.46       26.61
+         27 |         29        1.41       28.02
+         28 |         45        2.19       30.21
+         29 |         55        2.67       32.88
+         30 |         40        1.94       34.82
+         31 |         53        2.57       37.40
+         32 |         32        1.55       38.95
+         33 |         40        1.94       40.89
+         34 |         35        1.70       42.59
+         35 |         43        2.09       44.68
+         36 |         38        1.85       46.53
+         37 |         45        2.19       48.71
+         38 |         40        1.94       50.66
+         39 |         27        1.31       51.97
+         40 |         56        2.72       54.69
+         41 |         32        1.55       56.24
+         42 |         32        1.55       57.80
+         43 |         35        1.70       59.49
+         44 |         42        2.04       61.53
+         45 |         30        1.46       62.99
+         46 |         30        1.46       64.45
+         47 |         25        1.21       65.66
+         48 |         40        1.94       67.61
+         49 |         41        1.99       69.60
+         50 |         44        2.14       71.73
+         51 |         41        1.99       73.73
+         52 |         42        2.04       75.76
+         53 |         21        1.02       76.78
+         54 |         43        2.09       78.87
+         55 |         18        0.87       79.75
+         56 |         28        1.36       81.11
+         57 |         21        1.02       82.13
+         58 |         15        0.73       82.86
+         59 |         42        2.04       84.90
+         60 |         32        1.55       86.45
+         61 |         13        0.63       87.08
+         62 |          9        0.44       87.52
+         63 |         11        0.53       88.05
+         64 |         15        0.73       88.78
+         65 |          3        0.15       88.93
+         66 |         10        0.49       89.41
+         67 |         24        1.17       90.58
+         68 |         14        0.68       91.26
+         69 |         14        0.68       91.94
+         70 |         15        0.73       92.67
+         71 |          7        0.34       93.01
+         72 |         12        0.58       93.59
+         73 |         19        0.92       94.51
+         74 |         11        0.53       95.05
+         75 |          4        0.19       95.24
+         77 |          9        0.44       95.68
+         79 |         12        0.58       96.26
+         80 |          4        0.19       96.45
+         82 |         15        0.73       97.18
+         83 |          4        0.19       97.38
+         84 |          8        0.39       97.77
+         86 |          4        0.19       97.96
+         87 |          2        0.10       98.06
+         88 |          5        0.24       98.30
+         92 |          4        0.19       98.49
+         93 |          4        0.19       98.69
+         96 |          3        0.15       98.83
+        100 |          6        0.29       99.13
+        102 |          6        0.29       99.42
+        108 |          6        0.29       99.71
+        117 |          6        0.29      100.00
+------------+-----------------------------------
+      Total |      2,059      100.00
+
+  Number of |
+   firls in |
+      class |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |         22        1.07        1.07
+          2 |          1        0.05        1.12
+          3 |          1        0.05        1.17
+          4 |          9        0.44        1.60
+          5 |          5        0.24        1.85
+          6 |         12        0.58        2.43
+          7 |         12        0.58        3.01
+          8 |         17        0.83        3.84
+          9 |         19        0.92        4.76
+         10 |         18        0.87        5.63
+         11 |         18        0.87        6.51
+         12 |         27        1.31        7.82
+         13 |         18        0.87        8.69
+         14 |         30        1.46       10.15
+         15 |         26        1.26       11.41
+         16 |         22        1.07       12.48
+         17 |         22        1.07       13.55
+         18 |         18        0.87       14.42
+         19 |         35        1.70       16.12
+         20 |         23        1.12       17.24
+         21 |         27        1.31       18.55
+         22 |         36        1.75       20.30
+         23 |         44        2.14       22.44
+         24 |         44        2.14       24.58
+         25 |         55        2.67       27.25
+         26 |         46        2.23       29.48
+         27 |         52        2.53       32.01
+         28 |         41        1.99       34.00
+         29 |         46        2.23       36.23
+         30 |         43        2.09       38.32
+         31 |         39        1.89       40.21
+         32 |         37        1.80       42.01
+         33 |         26        1.26       43.27
+         34 |         53        2.57       45.85
+         35 |         33        1.60       47.45
+         36 |         34        1.65       49.10
+         37 |         67        3.25       52.36
+         38 |         55        2.67       55.03
+         39 |         39        1.89       56.92
+         40 |         41        1.99       58.91
+         41 |         49        2.38       61.29
+         42 |         35        1.70       62.99
+         43 |         43        2.09       65.08
+         44 |         29        1.41       66.49
+         45 |         33        1.60       68.09
+         46 |         32        1.55       69.65
+         47 |         37        1.80       71.44
+         48 |         24        1.17       72.61
+         49 |         32        1.55       74.16
+         50 |         35        1.70       75.86
+         51 |         27        1.31       77.17
+         52 |         35        1.70       78.87
+         53 |         17        0.83       79.70
+         54 |         25        1.21       80.91
+         55 |         14        0.68       81.59
+         56 |         22        1.07       82.66
+         57 |          9        0.44       83.10
+         58 |         38        1.85       84.94
+         59 |         16        0.78       85.72
+         60 |         17        0.83       86.55
+         61 |         17        0.83       87.37
+         62 |         29        1.41       88.78
+         63 |         23        1.12       89.90
+         64 |         16        0.78       90.68
+         65 |          3        0.15       90.82
+         66 |         17        0.83       91.65
+         67 |          7        0.34       91.99
+         68 |         20        0.97       92.96
+         69 |          8        0.39       93.35
+         70 |         15        0.73       94.07
+         71 |          8        0.39       94.46
+         72 |          8        0.39       94.85
+         73 |          4        0.19       95.05
+         74 |          4        0.19       95.24
+         75 |          3        0.15       95.39
+         76 |         10        0.49       95.87
+         77 |          4        0.19       96.07
+         79 |          4        0.19       96.26
+         80 |          8        0.39       96.65
+         81 |         10        0.49       97.13
+         82 |         12        0.58       97.72
+         84 |          5        0.24       97.96
+         86 |          4        0.19       98.15
+         87 |          8        0.39       98.54
+         90 |          5        0.24       98.79
+         91 |          4        0.19       98.98
+         95 |          3        0.15       99.13
+        108 |         12        0.58       99.71
+        113 |          6        0.29      100.00
+------------+-----------------------------------
+      Total |      2,059      100.00
+
+  Number of |
+  pupils in |
+    grammar |
+      class |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          5 |          1        0.05        0.05
+          7 |          3        0.15        0.20
+          8 |          1        0.05        0.25
+          9 |          4        0.20        0.44
+         10 |          3        0.15        0.59
+         11 |          3        0.15        0.74
+         12 |          7        0.35        1.09
+         13 |         11        0.54        1.63
+         14 |          9        0.44        2.07
+         15 |          9        0.44        2.52
+         16 |         11        0.54        3.06
+         17 |         15        0.74        3.80
+         18 |         12        0.59        4.40
+         19 |         16        0.79        5.19
+         20 |         17        0.84        6.02
+         21 |         10        0.49        6.52
+         22 |         14        0.69        7.21
+         23 |         11        0.54        7.75
+         24 |         11        0.54        8.30
+         25 |         18        0.89        9.19
+         26 |         12        0.59        9.78
+         27 |         12        0.59       10.37
+         28 |         12        0.59       10.96
+         29 |         16        0.79       11.75
+         30 |         19        0.94       12.69
+         31 |         22        1.09       13.78
+         32 |         11        0.54       14.32
+         33 |         19        0.94       15.26
+         34 |          8        0.40       15.65
+         35 |         13        0.64       16.30
+         36 |         16        0.79       17.09
+         37 |         14        0.69       17.78
+         38 |         21        1.04       18.81
+         39 |         19        0.94       19.75
+         40 |         20        0.99       20.74
+         41 |         15        0.74       21.48
+         42 |         28        1.38       22.86
+         43 |         20        0.99       23.85
+         44 |         22        1.09       24.94
+         45 |         20        0.99       25.93
+         46 |         28        1.38       27.31
+         47 |         18        0.89       28.20
+         48 |         34        1.68       29.88
+         49 |         20        0.99       30.86
+         50 |         26        1.28       32.15
+         51 |         46        2.27       34.42
+         52 |         27        1.33       35.75
+         53 |         20        0.99       36.74
+         54 |         12        0.59       37.33
+         55 |         32        1.58       38.91
+         56 |         26        1.28       40.20
+         57 |         26        1.28       41.48
+         58 |         23        1.14       42.62
+         59 |         24        1.19       43.80
+         60 |         14        0.69       44.49
+         61 |         36        1.78       46.27
+         62 |         18        0.89       47.16
+         63 |         25        1.23       48.40
+         64 |         14        0.69       49.09
+         65 |         27        1.33       50.42
+         66 |         13        0.64       51.06
+         67 |         29        1.43       52.49
+         68 |         24        1.19       53.68
+         69 |         17        0.84       54.52
+         70 |         27        1.33       55.85
+         71 |         20        0.99       56.84
+         72 |         28        1.38       58.22
+         73 |         16        0.79       59.01
+         74 |         20        0.99       60.00
+         75 |         22        1.09       61.09
+         76 |          8        0.40       61.48
+         77 |         18        0.89       62.37
+         78 |         20        0.99       63.36
+         79 |         18        0.89       64.25
+         80 |         20        0.99       65.23
+         81 |         21        1.04       66.27
+         82 |          9        0.44       66.72
+         83 |         33        1.63       68.35
+         84 |         18        0.89       69.23
+         85 |         30        1.48       70.72
+         86 |         15        0.74       71.46
+         87 |         18        0.89       72.35
+         88 |          3        0.15       72.49
+         89 |         12        0.59       73.09
+         90 |         24        1.19       74.27
+         91 |         12        0.59       74.86
+         92 |         30        1.48       76.35
+         93 |         24        1.19       77.53
+         94 |         15        0.74       78.27
+         95 |         21        1.04       79.31
+         96 |         12        0.59       79.90
+         97 |         21        1.04       80.94
+         98 |          9        0.44       81.38
+         99 |         21        1.04       82.42
+        100 |         16        0.79       83.21
+        101 |          6        0.30       83.51
+        102 |         13        0.64       84.15
+        103 |         22        1.09       85.23
+        104 |         21        1.04       86.27
+        105 |          9        0.44       86.72
+        106 |         15        0.74       87.46
+        107 |          6        0.30       87.75
+        108 |         14        0.69       88.44
+        109 |          7        0.35       88.79
+        110 |         15        0.74       89.53
+        111 |         12        0.59       90.12
+        112 |          7        0.35       90.47
+        113 |          4        0.20       90.67
+        114 |          8        0.40       91.06
+        115 |          4        0.20       91.26
+        116 |          7        0.35       91.60
+        117 |         11        0.54       92.15
+        118 |         11        0.54       92.69
+        119 |          4        0.20       92.89
+        120 |          7        0.35       93.23
+        121 |          8        0.40       93.63
+        122 |          4        0.20       93.83
+        123 |         12        0.59       94.42
+        124 |          4        0.20       94.62
+        125 |          4        0.20       94.81
+        127 |          8        0.40       95.21
+        129 |          8        0.40       95.60
+        130 |          8        0.40       96.00
+        131 |          4        0.20       96.20
+        132 |          8        0.40       96.59
+        133 |          4        0.20       96.79
+        134 |         16        0.79       97.58
+        136 |          4        0.20       97.78
+        137 |          4        0.20       97.98
+        141 |          4        0.20       98.17
+        142 |          4        0.20       98.37
+        147 |          4        0.20       98.57
+        151 |          8        0.40       98.96
+        156 |          4        0.20       99.16
+        158 |          5        0.25       99.41
+        179 |          6        0.30       99.70
+        203 |          6        0.30      100.00
+------------+-----------------------------------
+      Total |      2,025      100.00
+
+  Number of |
+  pupils in |
+ math class |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          5 |          1        0.05        0.05
+          7 |          2        0.10        0.15
+          8 |          1        0.05        0.20
+          9 |          3        0.15        0.35
+         10 |          5        0.25        0.59
+         11 |          5        0.25        0.84
+         12 |          3        0.15        0.99
+         13 |          8        0.40        1.38
+         14 |         10        0.49        1.88
+         15 |          9        0.44        2.32
+         16 |          7        0.35        2.67
+         17 |         18        0.89        3.56
+         18 |         11        0.54        4.10
+         19 |         15        0.74        4.84
+         20 |         15        0.74        5.58
+         21 |         15        0.74        6.32
+         22 |         17        0.84        7.16
+         23 |         15        0.74        7.90
+         24 |          8        0.40        8.30
+         25 |         16        0.79        9.09
+         26 |          7        0.35        9.43
+         27 |         11        0.54        9.98
+         28 |         13        0.64       10.62
+         29 |         20        0.99       11.60
+         30 |          9        0.44       12.05
+         31 |         27        1.33       13.38
+         32 |         16        0.79       14.17
+         33 |         17        0.84       15.01
+         34 |          4        0.20       15.21
+         35 |         15        0.74       15.95
+         36 |         16        0.79       16.74
+         37 |          8        0.40       17.14
+         38 |         19        0.94       18.07
+         39 |         18        0.89       18.96
+         40 |         24        1.19       20.15
+         41 |         13        0.64       20.79
+         42 |         14        0.69       21.48
+         43 |         26        1.28       22.77
+         44 |         12        0.59       23.36
+         45 |         22        1.09       24.44
+         46 |         28        1.38       25.83
+         47 |         22        1.09       26.91
+         48 |         38        1.88       28.79
+         49 |         16        0.79       29.58
+         50 |         28        1.38       30.96
+         51 |         36        1.78       32.74
+         52 |         32        1.58       34.32
+         53 |         35        1.73       36.05
+         54 |         10        0.49       36.54
+         55 |         20        0.99       37.53
+         56 |         22        1.09       38.62
+         57 |         34        1.68       40.30
+         58 |         22        1.09       41.38
+         59 |         31        1.53       42.91
+         60 |         17        0.84       43.75
+         61 |         30        1.48       45.23
+         62 |         18        0.89       46.12
+         63 |         25        1.23       47.36
+         64 |         16        0.79       48.15
+         65 |         30        1.48       49.63
+         66 |         19        0.94       50.57
+         67 |         27        1.33       51.90
+         68 |         21        1.04       52.94
+         69 |         12        0.59       53.53
+         70 |         20        0.99       54.52
+         71 |         22        1.09       55.60
+         72 |         17        0.84       56.44
+         73 |         23        1.14       57.58
+         74 |         20        0.99       58.57
+         75 |         25        1.23       59.80
+         76 |         12        0.59       60.40
+         77 |         24        1.19       61.58
+         78 |         16        0.79       62.37
+         79 |         17        0.84       63.21
+         80 |         20        0.99       64.20
+         81 |         12        0.59       64.79
+         82 |         27        1.33       66.12
+         83 |         18        0.89       67.01
+         84 |         30        1.48       68.49
+         85 |         30        1.48       69.98
+         86 |         18        0.89       70.86
+         87 |         18        0.89       71.75
+         88 |         12        0.59       72.35
+         89 |         12        0.59       72.94
+         90 |         15        0.74       73.68
+         91 |         15        0.74       74.42
+         92 |         21        1.04       75.46
+         93 |         15        0.74       76.20
+         94 |         24        1.19       77.38
+         95 |         15        0.74       78.12
+         96 |         18        0.89       79.01
+         97 |         18        0.89       79.90
+         98 |         15        0.74       80.64
+         99 |         15        0.74       81.38
+        100 |         12        0.59       81.98
+        101 |         18        0.89       82.86
+        102 |          6        0.30       83.16
+        103 |         24        1.19       84.35
+        104 |         24        1.19       85.53
+        105 |          6        0.30       85.83
+        106 |         19        0.94       86.77
+        107 |          3        0.15       86.91
+        108 |          6        0.30       87.21
+        109 |         21        1.04       88.25
+        110 |         16        0.79       89.04
+        111 |          7        0.35       89.38
+        112 |          9        0.44       89.83
+        113 |         13        0.64       90.47
+        114 |          4        0.20       90.67
+        115 |          4        0.20       90.86
+        116 |          7        0.35       91.21
+        117 |          7        0.35       91.56
+        118 |          4        0.20       91.75
+        119 |          7        0.35       92.10
+        120 |         15        0.74       92.84
+        121 |          8        0.40       93.23
+        122 |          4        0.20       93.43
+        123 |          4        0.20       93.63
+        124 |          4        0.20       93.83
+        125 |          4        0.20       94.02
+        126 |          4        0.20       94.22
+        127 |          4        0.20       94.42
+        129 |         16        0.79       95.21
+        130 |          8        0.40       95.60
+        131 |          4        0.20       95.80
+        133 |          8        0.40       96.20
+        134 |         12        0.59       96.79
+        135 |          8        0.40       97.19
+        136 |          4        0.20       97.38
+        139 |          4        0.20       97.58
+        143 |          4        0.20       97.78
+        145 |          4        0.20       97.98
+        147 |          4        0.20       98.17
+        148 |          4        0.20       98.37
+        151 |          8        0.40       98.77
+        153 |          4        0.20       98.96
+        156 |          4        0.20       99.16
+        160 |          5        0.25       99.41
+        179 |          6        0.30       99.70
+        204 |          6        0.30      100.00
+------------+-----------------------------------
+      Total |      2,025      100.00
+
+Cohort size |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          8 |          2        0.10        0.10
+         10 |          2        0.10        0.19
+         11 |          2        0.10        0.29
+         12 |          5        0.24        0.53
+         13 |          2        0.10        0.63
+         14 |          7        0.34        0.97
+         15 |         11        0.53        1.51
+         16 |         10        0.49        1.99
+         17 |          8        0.39        2.38
+         18 |          5        0.24        2.62
+         19 |         13        0.63        3.25
+         20 |         20        0.97        4.23
+         21 |         16        0.78        5.00
+         22 |         19        0.92        5.93
+         23 |         17        0.83        6.75
+         24 |          9        0.44        7.19
+         25 |         15        0.73        7.92
+         26 |         11        0.53        8.45
+         27 |         11        0.53        8.98
+         28 |         13        0.63        9.62
+         29 |         11        0.53       10.15
+         30 |         13        0.63       10.78
+         31 |          9        0.44       11.22
+         32 |         12        0.58       11.80
+         33 |         14        0.68       12.48
+         34 |          8        0.39       12.87
+         35 |         13        0.63       13.50
+         36 |          9        0.44       13.94
+         37 |          7        0.34       14.28
+         38 |          9        0.44       14.72
+         39 |          8        0.39       15.10
+         40 |         14        0.68       15.78
+         41 |         14        0.68       16.46
+         42 |         20        0.97       17.44
+         43 |         30        1.46       18.89
+         44 |         15        0.73       19.62
+         45 |         10        0.49       20.11
+         46 |         24        1.17       21.27
+         47 |         34        1.65       22.92
+         48 |         19        0.92       23.85
+         49 |         26        1.26       25.11
+         50 |         28        1.36       26.47
+         51 |         32        1.55       28.02
+         52 |         14        0.68       28.70
+         53 |         28        1.36       30.06
+         54 |         28        1.36       31.42
+         55 |         28        1.36       32.78
+         56 |         32        1.55       34.34
+         57 |         24        1.17       35.50
+         58 |         30        1.46       36.96
+         59 |         12        0.58       37.54
+         60 |         22        1.07       38.61
+         61 |         16        0.78       39.39
+         62 |         21        1.02       40.41
+         63 |         28        1.36       41.77
+         64 |         14        0.68       42.45
+         65 |         30        1.46       43.90
+         66 |         28        1.36       45.26
+         67 |         28        1.36       46.62
+         68 |         14        0.68       47.30
+         69 |         27        1.31       48.62
+         70 |         31        1.51       50.12
+         71 |         16        0.78       50.90
+         72 |         18        0.87       51.77
+         73 |         14        0.68       52.45
+         74 |         27        1.31       53.76
+         75 |         21        1.02       54.78
+         76 |         15        0.73       55.51
+         77 |         26        1.26       56.78
+         78 |         18        0.87       57.65
+         79 |         17        0.83       58.47
+         80 |         20        0.97       59.45
+         81 |         11        0.53       59.98
+         82 |         15        0.73       60.71
+         83 |         21        1.02       61.73
+         84 |         17        0.83       62.55
+         85 |         12        0.58       63.14
+         86 |          9        0.44       63.57
+         87 |         27        1.31       64.89
+         88 |         23        1.12       66.00
+         89 |         18        0.87       66.88
+         90 |         18        0.87       67.75
+         91 |         21        1.02       68.77
+         92 |         12        0.58       69.35
+         93 |         15        0.73       70.08
+         94 |         33        1.60       71.69
+         95 |         18        0.87       72.56
+         96 |         18        0.87       73.43
+         97 |         24        1.17       74.60
+         98 |         12        0.58       75.18
+         99 |         15        0.73       75.91
+        100 |         15        0.73       76.64
+        101 |         21        1.02       77.66
+        102 |         30        1.46       79.12
+        103 |          9        0.44       79.55
+        104 |          6        0.29       79.84
+        105 |         16        0.78       80.62
+        106 |         18        0.87       81.50
+        107 |         18        0.87       82.37
+        108 |         15        0.73       83.10
+        109 |          3        0.15       83.24
+        110 |          9        0.44       83.68
+        111 |         15        0.73       84.41
+        112 |          6        0.29       84.70
+        113 |          6        0.29       84.99
+        114 |          6        0.29       85.28
+        115 |         22        1.07       86.35
+        116 |         15        0.73       87.08
+        117 |         13        0.63       87.71
+        118 |         17        0.83       88.54
+        119 |          9        0.44       88.98
+        120 |         15        0.73       89.70
+        121 |          7        0.34       90.04
+        122 |          8        0.39       90.43
+        123 |          7        0.34       90.77
+        124 |         12        0.58       91.36
+        127 |          8        0.39       91.74
+        128 |          4        0.19       91.94
+        129 |          8        0.39       92.33
+        132 |          4        0.19       92.52
+        133 |         20        0.97       93.49
+        135 |          8        0.39       93.88
+        136 |          8        0.39       94.27
+        137 |          8        0.39       94.66
+        138 |          8        0.39       95.05
+        139 |          4        0.19       95.24
+        142 |          4        0.19       95.43
+        143 |          4        0.19       95.63
+        145 |          4        0.19       95.82
+        149 |          4        0.19       96.02
+        150 |          8        0.39       96.41
+        151 |          4        0.19       96.60
+        152 |          4        0.19       96.79
+        155 |          8        0.39       97.18
+        156 |         13        0.63       97.81
+        158 |          8        0.39       98.20
+        159 |          4        0.19       98.40
+        163 |          4        0.19       98.59
+        172 |          5        0.24       98.83
+        189 |          6        0.29       99.13
+        210 |          6        0.29       99.42
+        213 |          6        0.29       99.71
+        225 |          6        0.29      100.00
+------------+-----------------------------------
+      Total |      2,059      100.00
+
+.         valuereview using "$inputpath/AL99_Grade5_Data.dta", numericfile("$output
+> path/AL99_Grade5_ValueReview.tex")
+c_size    c_num5rd  mrkgrm    mrkmth    cohsize   passmath  passverb
+c_boys    c_type    ngrm      nmth      mathsize  verbsize
+c_girls   flgrm     flmth     grade     avgmath   avgverb
+(est1 stored)
+(output written to analysis/results/AL99_Grade5_ValueReview.tex)
+c_size   c_boys   c_girls  ngrm     nmth     cohsize
+
+ Class size |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          5 |          1        0.05        0.05
+          8 |          1        0.05        0.10
+          9 |          3        0.15        0.25
+         10 |          4        0.20        0.44
+         11 |          3        0.15        0.59
+         12 |          5        0.25        0.84
+         13 |          3        0.15        0.99
+         14 |          7        0.34        1.33
+         15 |          6        0.30        1.63
+         16 |          5        0.25        1.87
+         17 |          9        0.44        2.32
+         18 |          5        0.25        2.56
+         19 |         12        0.59        3.15
+         20 |         19        0.94        4.09
+         21 |         14        0.69        4.78
+         22 |         14        0.69        5.47
+         23 |         16        0.79        6.26
+         24 |         15        0.74        7.00
+         25 |          8        0.39        7.39
+         26 |          4        0.20        7.59
+         27 |         13        0.64        8.23
+         28 |         15        0.74        8.97
+         29 |         10        0.49        9.46
+         30 |         10        0.49        9.96
+         31 |          7        0.34       10.30
+         32 |          9        0.44       10.74
+         33 |          9        0.44       11.19
+         34 |         12        0.59       11.78
+         35 |         11        0.54       12.32
+         36 |          9        0.44       12.76
+         37 |          9        0.44       13.21
+         38 |         10        0.49       13.70
+         39 |         10        0.49       14.19
+         40 |          9        0.44       14.64
+         41 |         28        1.38       16.02
+         42 |         25        1.23       17.25
+         43 |         24        1.18       18.43
+         44 |         17        0.84       19.27
+         45 |         19        0.94       20.21
+         46 |         20        0.99       21.19
+         47 |         30        1.48       22.67
+         48 |         26        1.28       23.95
+         49 |         20        0.99       24.94
+         50 |         18        0.89       25.83
+         51 |         30        1.48       27.30
+         52 |         23        1.13       28.44
+         53 |         28        1.38       29.82
+         54 |         22        1.08       30.90
+         55 |         22        1.08       31.99
+         56 |         24        1.18       33.17
+         57 |         20        0.99       34.15
+         58 |         18        0.89       35.04
+         59 |         28        1.38       36.42
+         60 |         25        1.23       37.65
+         61 |         22        1.08       38.74
+         62 |         28        1.38       40.12
+         63 |         16        0.79       40.91
+         64 |         16        0.79       41.70
+         65 |         20        0.99       42.68
+         66 |         24        1.18       43.86
+         67 |         13        0.64       44.50
+         68 |         20        0.99       45.49
+         69 |         24        1.18       46.67
+         70 |         28        1.38       48.05
+         71 |         22        1.08       49.14
+         72 |         20        0.99       50.12
+         73 |         20        0.99       51.11
+         74 |         24        1.18       52.29
+         75 |         12        0.59       52.88
+         76 |         26        1.28       54.16
+         77 |         10        0.49       54.66
+         78 |         14        0.69       55.35
+         79 |         31        1.53       56.88
+         80 |         31        1.53       58.40
+         81 |         19        0.94       59.34
+         82 |         15        0.74       60.08
+         83 |         10        0.49       60.57
+         84 |         21        1.03       61.61
+         85 |         24        1.18       62.79
+         86 |         12        0.59       63.38
+         87 |         18        0.89       64.27
+         88 |         10        0.49       64.76
+         89 |         21        1.03       65.80
+         90 |         10        0.49       66.29
+         92 |         32        1.58       67.87
+         93 |          6        0.30       68.16
+         94 |         17        0.84       69.00
+         95 |         28        1.38       70.38
+         96 |         24        1.18       71.56
+         97 |         17        0.84       72.40
+         98 |         15        0.74       73.14
+         99 |         26        1.28       74.42
+        100 |         21        1.03       75.46
+        101 |         12        0.59       76.05
+        102 |         13        0.64       76.69
+        103 |          9        0.44       77.13
+        104 |          6        0.30       77.43
+        105 |          6        0.30       77.72
+        106 |         15        0.74       78.46
+        107 |         12        0.59       79.05
+        108 |          6        0.30       79.35
+        109 |         18        0.89       80.24
+        110 |          6        0.30       80.53
+        111 |         12        0.59       81.12
+        112 |          9        0.44       81.57
+        113 |         15        0.74       82.31
+        114 |         16        0.79       83.10
+        115 |          9        0.44       83.54
+        116 |         13        0.64       84.18
+        117 |         12        0.59       84.77
+        118 |         15        0.74       85.51
+        119 |         19        0.94       86.45
+        120 |         21        1.03       87.48
+        121 |          9        0.44       87.93
+        122 |          9        0.44       88.37
+        123 |          4        0.20       88.57
+        124 |          3        0.15       88.71
+        125 |          6        0.30       89.01
+        126 |          3        0.15       89.16
+        127 |         14        0.69       89.85
+        128 |          3        0.15       90.00
+        129 |          8        0.39       90.39
+        130 |         10        0.49       90.88
+        131 |          8        0.39       91.28
+        133 |          4        0.20       91.47
+        134 |         10        0.49       91.97
+        135 |          4        0.20       92.16
+        137 |          4        0.20       92.36
+        138 |          4        0.20       92.56
+        139 |          8        0.39       92.95
+        140 |          4        0.20       93.15
+        142 |         12        0.59       93.74
+        144 |          4        0.20       93.94
+        145 |          8        0.39       94.33
+        149 |          4        0.20       94.53
+        150 |          7        0.34       94.87
+        153 |          8        0.39       95.27
+        154 |         12        0.59       95.86
+        155 |          4        0.20       96.06
+        157 |          4        0.20       96.25
+        158 |          8        0.39       96.65
+        160 |          8        0.39       97.04
+        166 |          5        0.25       97.29
+        170 |          5        0.25       97.54
+        171 |          4        0.20       97.73
+        172 |          5        0.25       97.98
+        173 |          4        0.20       98.18
+        177 |          5        0.25       98.42
+        188 |          5        0.25       98.67
+        194 |          5        0.25       98.92
+        199 |          5        0.25       99.16
+        208 |          6        0.30       99.46
+        214 |          5        0.25       99.70
+        226 |          6        0.30      100.00
+------------+-----------------------------------
+      Total |      2,029      100.00
+
+  Number of |
+    boys in |
+      class |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |         20        0.99        0.99
+          1 |          1        0.05        1.03
+          2 |          1        0.05        1.08
+          4 |          2        0.10        1.18
+          5 |          4        0.20        1.38
+          6 |         12        0.59        1.97
+          7 |         10        0.49        2.46
+          8 |         17        0.84        3.30
+          9 |         15        0.74        4.04
+         10 |         18        0.89        4.93
+         11 |         22        1.08        6.01
+         12 |         26        1.28        7.29
+         13 |         21        1.03        8.33
+         14 |         21        1.03        9.36
+         15 |         20        0.99       10.35
+         16 |         16        0.79       11.14
+         17 |         22        1.08       12.22
+         18 |         25        1.23       13.45
+         19 |         16        0.79       14.24
+         20 |         46        2.27       16.51
+         21 |         26        1.28       17.79
+         22 |         39        1.92       19.71
+         23 |         36        1.77       21.49
+         24 |         53        2.61       24.10
+         25 |         57        2.81       26.91
+         26 |         40        1.97       28.88
+         27 |         49        2.41       31.30
+         28 |         44        2.17       33.46
+         29 |         36        1.77       35.24
+         30 |         52        2.56       37.80
+         31 |         40        1.97       39.77
+         32 |         40        1.97       41.74
+         33 |         43        2.12       43.86
+         34 |         24        1.18       45.05
+         35 |         30        1.48       46.53
+         36 |         47        2.32       48.84
+         37 |         38        1.87       50.71
+         38 |         46        2.27       52.98
+         39 |         33        1.63       54.61
+         40 |         37        1.82       56.43
+         41 |         17        0.84       57.27
+         42 |         51        2.51       59.78
+         43 |         32        1.58       61.36
+         44 |         38        1.87       63.23
+         45 |         24        1.18       64.42
+         46 |         26        1.28       65.70
+         47 |         27        1.33       67.03
+         48 |         42        2.07       69.10
+         49 |         33        1.63       70.72
+         50 |         24        1.18       71.91
+         51 |         20        0.99       72.89
+         52 |         29        1.43       74.32
+         53 |         33        1.63       75.95
+         54 |         31        1.53       77.48
+         55 |         24        1.18       78.66
+         56 |         38        1.87       80.53
+         57 |         10        0.49       81.03
+         58 |         34        1.68       82.70
+         59 |         30        1.48       84.18
+         60 |         18        0.89       85.07
+         61 |         12        0.59       85.66
+         62 |          9        0.44       86.10
+         63 |         15        0.74       86.84
+         64 |          8        0.39       87.24
+         65 |         14        0.69       87.93
+         66 |         12        0.59       88.52
+         67 |         20        0.99       89.50
+         68 |         12        0.59       90.09
+         69 |         13        0.64       90.73
+         70 |         10        0.49       91.23
+         71 |         11        0.54       91.77
+         72 |          3        0.15       91.92
+         73 |         18        0.89       92.80
+         74 |          2        0.10       92.90
+         75 |          3        0.15       93.05
+         76 |         12        0.59       93.64
+         78 |         15        0.74       94.38
+         79 |          8        0.39       94.78
+         80 |          8        0.39       95.17
+         81 |         17        0.84       96.01
+         82 |          4        0.20       96.21
+         83 |          8        0.39       96.60
+         84 |         10        0.49       97.09
+         86 |          5        0.25       97.34
+         87 |          4        0.20       97.54
+         88 |          9        0.44       97.98
+         89 |          5        0.25       98.23
+         93 |          5        0.25       98.47
+         96 |          4        0.20       98.67
+        100 |          5        0.25       98.92
+        103 |          5        0.25       99.16
+        106 |          6        0.30       99.46
+        109 |          5        0.25       99.70
+        112 |          6        0.30      100.00
+------------+-----------------------------------
+      Total |      2,029      100.00
+
+  Number of |
+   firls in |
+      class |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |         23        1.13        1.13
+          1 |          1        0.05        1.18
+          4 |          5        0.25        1.43
+          5 |          9        0.44        1.87
+          6 |         13        0.64        2.51
+          7 |         17        0.84        3.35
+          8 |         15        0.74        4.09
+          9 |         20        0.99        5.08
+         10 |         21        1.03        6.11
+         11 |         23        1.13        7.24
+         12 |         20        0.99        8.23
+         13 |         20        0.99        9.22
+         14 |         19        0.94       10.15
+         15 |         21        1.03       11.19
+         16 |         26        1.28       12.47
+         17 |         24        1.18       13.65
+         18 |         24        1.18       14.83
+         19 |         21        1.03       15.87
+         20 |         34        1.68       17.55
+         21 |         55        2.71       20.26
+         22 |         45        2.22       22.47
+         23 |         61        3.01       25.48
+         24 |         49        2.41       27.90
+         25 |         47        2.32       30.21
+         26 |         49        2.41       32.63
+         27 |         33        1.63       34.25
+         28 |         31        1.53       35.78
+         29 |         30        1.48       37.26
+         30 |         23        1.13       38.39
+         31 |         29        1.43       39.82
+         32 |         59        2.91       42.73
+         33 |         41        2.02       44.75
+         34 |         66        3.25       48.00
+         35 |         27        1.33       49.33
+         36 |         49        2.41       51.75
+         37 |         57        2.81       54.56
+         38 |         33        1.63       56.19
+         39 |         42        2.07       58.26
+         40 |         30        1.48       59.73
+         41 |         37        1.82       61.56
+         42 |         43        2.12       63.68
+         43 |         48        2.37       66.04
+         44 |         25        1.23       67.27
+         45 |         22        1.08       68.36
+         46 |         32        1.58       69.94
+         47 |         38        1.87       71.81
+         48 |         23        1.13       72.94
+         49 |         46        2.27       75.21
+         50 |         43        2.12       77.33
+         51 |         18        0.89       78.22
+         52 |         20        0.99       79.20
+         53 |         30        1.48       80.68
+         54 |         16        0.79       81.47
+         55 |         27        1.33       82.80
+         56 |         21        1.03       83.83
+         57 |         24        1.18       85.02
+         58 |          3        0.15       85.17
+         59 |         27        1.33       86.50
+         60 |         23        1.13       87.63
+         61 |         17        0.84       88.47
+         62 |         24        1.18       89.65
+         63 |          5        0.25       89.90
+         64 |         11        0.54       90.44
+         65 |         10        0.49       90.93
+         66 |         14        0.69       91.62
+         67 |         14        0.69       92.31
+         68 |          5        0.25       92.56
+         69 |         19        0.94       93.49
+         70 |          6        0.30       93.79
+         71 |         11        0.54       94.33
+         72 |          4        0.20       94.53
+         73 |          4        0.20       94.73
+         74 |          8        0.39       95.12
+         75 |         12        0.59       95.71
+         77 |          8        0.39       96.11
+         78 |          9        0.44       96.55
+         82 |         12        0.59       97.14
+         83 |          3        0.15       97.29
+         84 |          5        0.25       97.54
+         86 |          4        0.20       97.73
+         88 |          5        0.25       97.98
+         91 |         10        0.49       98.47
+         92 |          4        0.20       98.67
+         95 |          5        0.25       98.92
+         99 |          5        0.25       99.16
+        102 |          6        0.30       99.46
+        105 |          5        0.25       99.70
+        114 |          6        0.30      100.00
+------------+-----------------------------------
+      Total |      2,029      100.00
+
+  Number of |
+  pupils in |
+    grammar |
+      class |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          3 |          1        0.05        0.05
+          5 |          3        0.15        0.20
+          6 |          1        0.05        0.25
+          7 |          3        0.15        0.40
+          8 |          2        0.10        0.51
+          9 |          4        0.20        0.71
+         10 |          2        0.10        0.81
+         11 |          6        0.30        1.11
+         12 |          5        0.25        1.37
+         13 |          6        0.30        1.67
+         14 |          7        0.35        2.02
+         15 |          9        0.46        2.48
+         16 |          9        0.46        2.93
+         17 |         17        0.86        3.79
+         18 |         12        0.61        4.40
+         19 |         18        0.91        5.31
+         20 |         16        0.81        6.12
+         21 |         21        1.06        7.18
+         22 |         14        0.71        7.89
+         23 |          8        0.40        8.29
+         24 |          8        0.40        8.70
+         25 |         15        0.76        9.45
+         26 |         12        0.61       10.06
+         27 |         12        0.61       10.67
+         28 |         16        0.81       11.48
+         29 |         16        0.81       12.29
+         30 |         14        0.71       12.99
+         31 |          9        0.46       13.45
+         32 |         13        0.66       14.11
+         33 |         14        0.71       14.81
+         34 |          9        0.46       15.27
+         35 |         16        0.81       16.08
+         36 |         19        0.96       17.04
+         37 |         21        1.06       18.10
+         38 |         30        1.52       19.62
+         39 |         23        1.16       20.78
+         40 |         33        1.67       22.45
+         41 |         12        0.61       23.05
+         42 |         30        1.52       24.57
+         43 |         28        1.42       25.99
+         44 |         28        1.42       27.40
+         45 |         24        1.21       28.61
+         46 |         20        1.01       29.63
+         47 |         24        1.21       30.84
+         48 |         34        1.72       32.56
+         49 |         24        1.21       33.77
+         50 |         20        1.01       34.78
+         51 |         18        0.91       35.69
+         52 |         38        1.92       37.61
+         53 |         24        1.21       38.83
+         54 |         34        1.72       40.55
+         55 |         24        1.21       41.76
+         56 |         24        1.21       42.97
+         57 |         16        0.81       43.78
+         58 |         27        1.37       45.15
+         59 |         21        1.06       46.21
+         60 |         21        1.06       47.27
+         61 |         20        1.01       48.28
+         62 |         27        1.37       49.65
+         63 |         35        1.77       51.42
+         64 |         22        1.11       52.53
+         65 |         20        1.01       53.54
+         66 |          6        0.30       53.84
+         67 |         14        0.71       54.55
+         68 |         20        1.01       55.56
+         69 |         28        1.42       56.98
+         70 |         18        0.91       57.89
+         71 |         17        0.86       58.75
+         72 |         19        0.96       59.71
+         73 |         10        0.51       60.21
+         74 |         21        1.06       61.27
+         75 |         21        1.06       62.34
+         76 |         32        1.62       63.95
+         77 |         22        1.11       65.07
+         78 |         18        0.91       65.98
+         79 |         15        0.76       66.73
+         80 |         11        0.56       67.29
+         81 |         27        1.37       68.66
+         82 |         24        1.21       69.87
+         83 |         26        1.31       71.18
+         84 |         30        1.52       72.70
+         85 |         15        0.76       73.46
+         86 |         12        0.61       74.06
+         87 |         27        1.37       75.43
+         88 |         16        0.81       76.24
+         89 |         15        0.76       77.00
+         90 |          3        0.15       77.15
+         91 |         12        0.61       77.76
+         92 |         12        0.61       78.36
+         93 |          9        0.46       78.82
+         94 |         18        0.91       79.73
+         95 |          9        0.46       80.18
+         96 |          3        0.15       80.33
+         97 |         21        1.06       81.40
+         98 |         21        1.06       82.46
+         99 |         30        1.52       83.97
+        100 |         13        0.66       84.63
+        101 |          6        0.30       84.93
+        102 |          6        0.30       85.24
+        103 |         22        1.11       86.35
+        104 |         12        0.61       86.96
+        105 |         31        1.57       88.52
+        106 |         16        0.81       89.33
+        107 |          9        0.46       89.79
+        108 |          6        0.30       90.09
+        109 |          4        0.20       90.29
+        110 |         10        0.51       90.80
+        111 |          3        0.15       90.95
+        112 |          7        0.35       91.30
+        113 |         10        0.51       91.81
+        114 |          3        0.15       91.96
+        115 |          7        0.35       92.32
+        117 |          4        0.20       92.52
+        118 |          4        0.20       92.72
+        119 |          8        0.40       93.12
+        121 |          4        0.20       93.33
+        122 |          8        0.40       93.73
+        123 |          4        0.20       93.93
+        125 |          4        0.20       94.14
+        126 |          4        0.20       94.34
+        127 |          4        0.20       94.54
+        128 |          4        0.20       94.74
+        130 |          4        0.20       94.94
+        134 |          8        0.40       95.35
+        135 |          4        0.20       95.55
+        136 |          8        0.40       95.96
+        137 |          4        0.20       96.16
+        138 |          4        0.20       96.36
+        139 |          4        0.20       96.56
+        140 |          4        0.20       96.76
+        142 |          4        0.20       96.97
+        143 |          4        0.20       97.17
+        144 |          9        0.46       97.62
+        147 |          5        0.25       97.88
+        150 |          4        0.20       98.08
+        152 |          4        0.20       98.28
+        153 |          4        0.20       98.48
+        157 |          4        0.20       98.69
+        168 |          5        0.25       98.94
+        169 |          5        0.25       99.19
+        174 |          5        0.25       99.44
+        187 |          5        0.25       99.70
+        200 |          6        0.30      100.00
+------------+-----------------------------------
+      Total |      1,978      100.00
+
+  Number of |
+  pupils in |
+ math class |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          3 |          1        0.05        0.05
+          5 |          3        0.15        0.20
+          6 |          1        0.05        0.25
+          7 |          2        0.10        0.35
+          8 |          2        0.10        0.46
+          9 |          2        0.10        0.56
+         10 |          2        0.10        0.66
+         11 |          6        0.30        0.96
+         12 |          7        0.35        1.31
+         13 |          6        0.30        1.62
+         14 |          6        0.30        1.92
+         15 |          8        0.40        2.33
+         16 |         10        0.51        2.83
+         17 |         14        0.71        3.54
+         18 |         16        0.81        4.35
+         19 |         16        0.81        5.16
+         20 |         12        0.61        5.76
+         21 |         24        1.21        6.98
+         22 |         13        0.66        7.63
+         23 |          9        0.46        8.09
+         24 |         10        0.51        8.59
+         25 |         12        0.61        9.20
+         26 |         12        0.61        9.81
+         27 |         12        0.61       10.41
+         28 |         14        0.71       11.12
+         29 |         15        0.76       11.88
+         30 |         15        0.76       12.64
+         31 |         10        0.51       13.14
+         32 |         16        0.81       13.95
+         33 |         10        0.51       14.46
+         34 |         11        0.56       15.02
+         35 |         13        0.66       15.67
+         36 |         13        0.66       16.33
+         37 |         18        0.91       17.24
+         38 |         31        1.57       18.81
+         39 |         28        1.42       20.22
+         40 |         27        1.37       21.59
+         41 |         23        1.16       22.75
+         42 |          6        0.30       23.05
+         43 |         28        1.42       24.47
+         44 |         34        1.72       26.19
+         45 |         28        1.42       27.60
+         46 |         26        1.31       28.92
+         47 |         22        1.11       30.03
+         48 |         22        1.11       31.14
+         49 |         24        1.21       32.36
+         50 |         18        0.91       33.27
+         51 |         22        1.11       34.38
+         52 |         36        1.82       36.20
+         53 |         28        1.42       37.61
+         54 |         24        1.21       38.83
+         55 |         34        1.72       40.55
+         56 |         22        1.11       41.66
+         57 |         22        1.11       42.77
+         58 |         33        1.67       44.44
+         59 |         21        1.06       45.50
+         60 |         19        0.96       46.46
+         61 |         22        1.11       47.57
+         62 |         16        0.81       48.38
+         63 |         30        1.52       49.90
+         64 |         24        1.21       51.11
+         65 |         18        0.91       52.02
+         66 |         20        1.01       53.03
+         67 |         22        1.11       54.15
+         68 |         17        0.86       55.01
+         69 |         25        1.26       56.27
+         70 |         26        1.31       57.58
+         71 |         14        0.71       58.29
+         72 |         13        0.66       58.95
+         73 |          7        0.35       59.30
+         74 |         32        1.62       60.92
+         75 |         16        0.81       61.73
+         76 |         21        1.06       62.79
+         77 |         26        1.31       64.11
+         78 |         19        0.96       65.07
+         79 |         12        0.61       65.67
+         80 |         20        1.01       66.68
+         81 |         24        1.21       67.90
+         82 |         21        1.06       68.96
+         83 |         24        1.21       70.17
+         84 |         20        1.01       71.18
+         85 |         18        0.91       72.09
+         86 |         12        0.61       72.70
+         87 |          9        0.46       73.15
+         88 |         34        1.72       74.87
+         89 |          9        0.46       75.33
+         90 |         15        0.76       76.09
+         91 |          9        0.46       76.54
+         92 |         21        1.06       77.60
+         93 |          9        0.46       78.06
+         94 |         12        0.61       78.67
+         95 |         15        0.76       79.42
+         96 |          9        0.46       79.88
+         97 |         18        0.91       80.79
+         98 |         21        1.06       81.85
+         99 |         12        0.61       82.46
+        100 |         25        1.26       83.72
+        101 |         15        0.76       84.48
+        102 |         12        0.61       85.09
+        103 |         15        0.76       85.84
+        104 |         18        0.91       86.75
+        105 |         17        0.86       87.61
+        106 |         19        0.96       88.57
+        107 |          9        0.46       89.03
+        108 |          3        0.15       89.18
+        109 |         12        0.61       89.79
+        110 |         10        0.51       90.29
+        111 |          6        0.30       90.60
+        112 |          7        0.35       90.95
+        114 |         10        0.51       91.46
+        115 |          7        0.35       91.81
+        116 |          6        0.30       92.11
+        118 |          8        0.40       92.52
+        119 |          4        0.20       92.72
+        121 |          4        0.20       92.92
+        123 |          8        0.40       93.33
+        124 |          4        0.20       93.53
+        125 |          8        0.40       93.93
+        126 |          8        0.40       94.34
+        128 |          8        0.40       94.74
+        130 |          4        0.20       94.94
+        133 |          4        0.20       95.15
+        136 |          8        0.40       95.55
+        137 |          4        0.20       95.75
+        138 |         12        0.61       96.36
+        139 |          4        0.20       96.56
+        141 |          4        0.20       96.76
+        142 |          4        0.20       96.97
+        146 |          4        0.20       97.17
+        147 |          5        0.25       97.42
+        152 |         12        0.61       98.03
+        154 |          9        0.46       98.48
+        158 |          4        0.20       98.69
+        169 |          5        0.25       98.94
+        174 |          5        0.25       99.19
+        182 |          5        0.25       99.44
+        191 |          5        0.25       99.70
+        201 |          6        0.30      100.00
+------------+-----------------------------------
+      Total |      1,978      100.00
+
+Cohort size |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          5 |          1        0.05        0.05
+          8 |          1        0.05        0.10
+          9 |          3        0.15        0.25
+         10 |          4        0.20        0.44
+         11 |          3        0.15        0.59
+         12 |          7        0.34        0.94
+         13 |          1        0.05        0.99
+         14 |          6        0.30        1.28
+         15 |          9        0.44        1.72
+         16 |          8        0.39        2.12
+         17 |          9        0.44        2.56
+         18 |          5        0.25        2.81
+         19 |         14        0.69        3.50
+         20 |         21        1.03        4.53
+         21 |         18        0.89        5.42
+         22 |         16        0.79        6.21
+         23 |         17        0.84        7.05
+         24 |         16        0.79        7.84
+         25 |          9        0.44        8.28
+         26 |          8        0.39        8.67
+         27 |         15        0.74        9.41
+         28 |         14        0.69       10.10
+         29 |         12        0.59       10.69
+         30 |          8        0.39       11.09
+         31 |          6        0.30       11.38
+         32 |         10        0.49       11.88
+         33 |         10        0.49       12.37
+         34 |         12        0.59       12.96
+         35 |          9        0.44       13.41
+         36 |          8        0.39       13.80
+         37 |         11        0.54       14.34
+         38 |         14        0.69       15.03
+         39 |         10        0.49       15.52
+         40 |         15        0.74       16.26
+         41 |         26        1.28       17.55
+         42 |         22        1.08       18.63
+         43 |         31        1.53       20.16
+         44 |         19        0.94       21.09
+         45 |         20        0.99       22.08
+         46 |         26        1.28       23.36
+         47 |         28        1.38       24.74
+         48 |         32        1.58       26.32
+         49 |         14        0.69       27.01
+         50 |         28        1.38       28.39
+         51 |         28        1.38       29.77
+         52 |         24        1.18       30.95
+         53 |         24        1.18       32.13
+         54 |         24        1.18       33.32
+         55 |         28        1.38       34.70
+         56 |         26        1.28       35.98
+         57 |         24        1.18       37.16
+         58 |         26        1.28       38.44
+         59 |         30        1.48       39.92
+         60 |         20        0.99       40.91
+         61 |         24        1.18       42.09
+         62 |         18        0.89       42.98
+         63 |         24        1.18       44.16
+         64 |         22        1.08       45.24
+         65 |         24        1.18       46.43
+         66 |         26        1.28       47.71
+         67 |         15        0.74       48.45
+         68 |         16        0.79       49.24
+         69 |         21        1.03       50.27
+         70 |         29        1.43       51.70
+         71 |         22        1.08       52.78
+         72 |         15        0.74       53.52
+         73 |         21        1.03       54.56
+         74 |         29        1.43       55.99
+         75 |         19        0.94       56.92
+         76 |         23        1.13       58.06
+         77 |         10        0.49       58.55
+         78 |         17        0.84       59.39
+         79 |         26        1.28       60.67
+         80 |         35        1.72       62.40
+         81 |         17        0.84       63.23
+         82 |         11        0.54       63.78
+         83 |          6        0.30       64.07
+         84 |         20        0.99       65.06
+         85 |         17        0.84       65.89
+         86 |         10        0.49       66.39
+         87 |         25        1.23       67.62
+         88 |         15        0.74       68.36
+         89 |          9        0.44       68.80
+         90 |         12        0.59       69.39
+         92 |         24        1.18       70.58
+         93 |         12        0.59       71.17
+         94 |         24        1.18       72.35
+         95 |         27        1.33       73.68
+         96 |         27        1.33       75.01
+         97 |         15        0.74       75.75
+         98 |         24        1.18       76.93
+         99 |         21        1.03       77.97
+        100 |         12        0.59       78.56
+        101 |          9        0.44       79.00
+        102 |          9        0.44       79.45
+        103 |         18        0.89       80.34
+        104 |          9        0.44       80.78
+        105 |          7        0.34       81.12
+        106 |         15        0.74       81.86
+        107 |          9        0.44       82.31
+        108 |         19        0.94       83.24
+        109 |         15        0.74       83.98
+        110 |         12        0.59       84.57
+        111 |         12        0.59       85.17
+        112 |          9        0.44       85.61
+        113 |         15        0.74       86.35
+        114 |         13        0.64       86.99
+        115 |          6        0.30       87.28
+        116 |          9        0.44       87.73
+        117 |          3        0.15       87.88
+        118 |          9        0.44       88.32
+        119 |         12        0.59       88.91
+        120 |         12        0.59       89.50
+        121 |          6        0.30       89.80
+        122 |          3        0.15       89.95
+        123 |         16        0.79       90.73
+        124 |          4        0.20       90.93
+        127 |          8        0.39       91.33
+        129 |         12        0.59       91.92
+        130 |          4        0.20       92.11
+        131 |         16        0.79       92.90
+        133 |          4        0.20       93.10
+        134 |          8        0.39       93.49
+        135 |          4        0.20       93.69
+        138 |          4        0.20       93.89
+        139 |          8        0.39       94.28
+        140 |          4        0.20       94.48
+        142 |          8        0.39       94.87
+        144 |          8        0.39       95.27
+        145 |          8        0.39       95.66
+        153 |          8        0.39       96.06
+        154 |          8        0.39       96.45
+        157 |          4        0.20       96.65
+        158 |          8        0.39       97.04
+        159 |          5        0.25       97.29
+        160 |          8        0.39       97.68
+        166 |          5        0.25       97.93
+        170 |          5        0.25       98.18
+        172 |          5        0.25       98.42
+        177 |          5        0.25       98.67
+        188 |          5        0.25       98.92
+        189 |          5        0.25       99.16
+        195 |          5        0.25       99.41
+        208 |          6        0.30       99.70
+        217 |          6        0.30      100.00
+------------+-----------------------------------
+      Total |      2,029      100.00
+
+.         
+.         *** END OF DO FILE ***
+. 
+.         
+.         
+. 
+end of do-file
+
+.         
+.         **** TASK 2B
+.         do "$a/AK91Tables.do"
+
+. * ==============================================================================
+. *
+. * Title                         : AK91 Replication
+. * Modified by           : Busra Canci
+. * Stata version         : 16
+. * Last modified         : 20230909
+. *
+. * ==============================================================================
+.         
+. 
+. set more off
+
+. clear all
+
+. 
+. global path "C:\Users\buca4591\Desktop\2nd year\applied\busra_canci\task2"
+
+.         
+. cd "$path"
+C:\Users\buca4591\Desktop\2nd year\applied\busra_canci\task2
+
+. 
+. global inputpath        "analysis/data" 
+
+. global outputpath       "analysis/results"
+
+.         
+.         ** INDEPENDENT VARIABLES MACROS
+.         global CONTROLS "RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ES
+> OCENT WSOCENT MT"
+
+.         global QTR              "QTR120-QTR129 QTR220-QTR229 QTR320-QTR329 YR20-Y
+> R28"
+
+.         
+.         ******* CREATE TABLES IV-VI
+.         foreach x in IV V VI {
+  2.                 
+.         ** UPLOAD DATA
+.         use "$inputpath/Table`x'_Data.dta", clear
+  3.         
+.         ** DATA ANALYSIS
+.         
+.         ** Col 1 3 5 7 (OLS) ***
+.         eststo a1: qui xi: reg LWKLYWGE EDUC i.YOB
+  4.         estadd local yobd "Yes"
+  5.         estadd local rord "No"
+  6.         eststo a3: qui xi: reg LWKLYWGE EDUC i.YOB AGEQ AGEQSQ 
+  7.         estadd local yobd "Yes"
+  8.         estadd local rord "No"
+  9.         eststo a5: qui xi: reg LWKLYWGE EDUC $CONTROLS i.YOB 
+ 10.         estadd local yobd "Yes"
+ 11.         estadd local rord "No"
+ 12.         eststo a7: qui xi: reg LWKLYWGE EDUC $CONTROLS i.YOB AGEQ AGEQSQ
+ 13.         estadd local yobd "Yes"
+ 14.         estadd local rord "No"
+ 15. 
+.         ** Col 2 4 6 8 (IV 2SLS) ***
+.         eststo a2: qui xi: ivregress 2sls LWKLYWGE i.YOB (EDUC = $QTR), first rob
+> ust
+ 16.         estadd local yobd "Yes"
+ 17.         estadd local rord "Yes"
+ 18.         eststo a4: qui xi: ivregress 2sls LWKLYWGE i.YOB AGEQ AGEQSQ (EDUC = $
+> QTR), first robust
+ 19.         estadd local yobd "Yes"
+ 20.         estadd local rord "Yes"
+ 21.         eststo a6: qui xi: ivregress 2sls  i.YOB $CONTROLS (EDUC = $QTR), firs
+> t robust
+ 22.         estadd local yobd "Yes"
+ 23.         estadd local rord "Yes"
+ 24.         eststo a8: qui xi: ivregress 2sls LWKLYWGE i.YOB $CONTROLS AGEQ AGEQSQ
+>  (EDUC = $QTR), first robust
+ 25.         estadd local yobd "Yes"
+ 26.         estadd local rord "Yes"
+ 27.         
+.         #d;
+delimiter now ;
+.         esttab a1 a2 a3 a4 a5 a6 a7 a8 using "$outputpath/AK91_Table`x'.tex", ord
+> er(EDUC RACE SMSA MARRIED AGEQ AGEQSQ) 
+>         keep(EDUC RACE SMSA MARRIED AGEQ AGEQSQ) 
+>         label  collabels(none) mlabels(, none) starlevels(* 0.10 ** 0.05 *** 0.01
+> )  
+>         cells(b(fmt(3)) se(fmt(3) par)) style(tex) stats(N yobd rord chi2,  
+>         labels("Number of Observations" "9 year-of-birth dummies" "8 Region of re
+> sidence dummies" "$\chi^2$")
+>         fmt(%9.0fc 3)) replace;
+ 28.         # d cr  
+delimiter now cr
+.         eststo clear
+ 29.         
+.         }
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "Yes"
+Warning:  variance matrix is nonsymmetric or highly singular
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "Yes"
+Warning:  variance matrix is nonsymmetric or highly singular
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "Yes"
+(output written to analysis/results/AK91_TableIV.tex)
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "Yes"
+Warning:  variance matrix is nonsymmetric or highly singular
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "Yes"
+Warning:  variance matrix is nonsymmetric or highly singular
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "Yes"
+(output written to analysis/results/AK91_TableV.tex)
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "No"
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "Yes"
+Warning:  variance matrix is nonsymmetric or highly singular
+
+added macro:
+               e(yobd) : "Yes"
+
+added macro:
+               e(rord) : "Yes"
+--Break--
+r(1);
+
+end of do-file
+--Break--
+r(1);
+
+end of do-file
+
+--Break--
+r(1);
+
+. exit, clear

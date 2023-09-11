@@ -1,0 +1,1369 @@
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91\communications/logs/AK91_Replication.log
+  log type:  text
+ opened on:   5 Sep 2023, 17:19:37
+
+.         
+.         ** SET BUILD AND ANALYSIS PATH
+.         global build    "build/code" 
+
+.         global analysis "analysis/code"
+
+.         
+.         ** BUILD BASIC DATSET FOR ANALYSIS/INPUT
+.         foreach x in IV V VI {
+  2.                 do "$build/Table_`x'_data.do"
+  3.         }
+
+. * ==============================================================================
+. *
+. * Title                         : AK91 Replication
+. * Aim                           : Data cleaning for Table IV
+. * Modified by           : Busra Canci
+. * Stata version         : 16
+. * Last modified         : 20230905
+. *
+. * ==============================================================================
+. 
+. set more off
+
+. clear all
+
+. 
+. global path "C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91"
+
+.         
+. cd "$path"
+C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91
+
+. 
+. global inputpath        "raw/data"
+
+. global outputpath       "analysis/data"
+
+.         
+. use "$inputpath/NEW7080.dta", clear
+
+.         
+. rename v1 AGE
+
+. rename v2 AGEQ
+
+. rename v4 EDUC
+
+. rename v5 ENOCENT
+
+. rename v6 ESOCENT
+
+. rename v9 LWKLYWGE
+
+. rename v10 MARRIED
+
+. rename v11 MIDATL
+
+. rename v12 MT
+
+. rename v13 NEWENG
+
+. rename v16 CENSUS
+
+. rename v18 QOB
+
+. rename v19 RACE
+
+. rename v20 SMSA
+
+. rename v21 SOATL
+
+. rename v24 WNOCENT
+
+. rename v25 WSOCENT
+
+. rename v27 YOB
+
+. drop v8
+
+. gen COHORT=20.29
+
+. replace COHORT=30.39 if YOB<=39 & YOB >=30
+(329,509 real changes made)
+
+. replace COHORT=40.49 if YOB<=49 & YOB >=40
+(486,926 real changes made)
+
+. replace AGEQ=AGEQ-1900 if CENSUS==80
+(816,435 real changes made)
+
+. gen AGEQSQ= AGEQ*AGEQ
+
+. 
+. ** Generate YOB dummies **********
+. gen YR20=0  
+
+. replace YR20=1 if YOB==1920  
+(23,725 real changes made)
+
+. replace YR20=1 if YOB==30 
+(33,602 real changes made)
+
+. replace YR20=1 if YOB==40 
+(38,218 real changes made)
+
+. gen YR21=0  
+
+. replace YR21=1 if YOB==1921  
+(24,978 real changes made)
+
+. replace YR21=1 if YOB==31
+(30,583 real changes made)
+
+. replace YR21=1 if YOB==41 
+(38,387 real changes made)
+
+. gen YR22=0  
+
+. replace YR22=1 if YOB==1922  
+(24,264 real changes made)
+
+. replace YR22=1 if YOB==32 
+(32,211 real changes made)
+
+. replace YR22=1 if YOB==42 
+(45,018 real changes made)
+
+. gen YR23=0  
+
+. replace YR23=1 if YOB==1923 
+(24,345 real changes made)
+
+. replace YR23=1 if YOB==33 
+(30,751 real changes made)
+
+. replace YR23=1 if YOB==43 
+(46,349 real changes made)
+
+. gen YR24=0  
+
+. replace YR24=1 if YOB==1924  
+(25,548 real changes made)
+
+. replace YR24=1 if YOB==34 
+(31,916 real changes made)
+
+. replace YR24=1 if YOB==44 
+(44,387 real changes made)
+
+. gen YR25=0  
+
+. replace YR25=1 if YOB==1925  
+(24,834 real changes made)
+
+. replace YR25=1 if YOB==35 
+(32,773 real changes made)
+
+. replace YR25=1 if YOB==45 
+(44,546 real changes made)
+
+. gen YR26=0  
+
+. replace YR26=1 if YOB==1926  
+(24,431 real changes made)
+
+. replace YR26=1 if YOB==36 
+(32,676 real changes made)
+
+. replace YR26=1 if YOB==46 
+(54,122 real changes made)
+
+. gen YR27=0  
+
+. replace YR27=1 if YOB==1927  
+(25,650 real changes made)
+
+. replace YR27=1 if YOB==37 
+(33,969 real changes made)
+
+. replace YR27=1 if YOB==47 
+(60,788 real changes made)
+
+. gen YR28=0  
+
+. replace YR28=1 if YOB==1928  
+(24,614 real changes made)
+
+. replace YR28=1 if YOB==38 
+(35,223 real changes made)
+
+. replace YR28=1 if YOB==48 
+(57,692 real changes made)
+
+. gen YR29=0  
+
+. replace YR29=1 if YOB==1929  
+(24,810 real changes made)
+
+. replace YR29=1 if YOB==39 
+(35,805 real changes made)
+
+. replace YR29=1 if YOB==49 
+(57,419 real changes made)
+
+. 
+. ** Generate QOB dummies ***********
+. gen QTR1=0
+
+. replace QTR1=1 if QOB==1
+(262,019 real changes made)
+
+. gen QTR2=0
+
+. replace QTR2=1 if QOB==2
+(255,733 real changes made)
+
+. gen QTR3=0
+
+. replace QTR3=1 if QOB==3
+(280,749 real changes made)
+
+. gen QTR4=0
+
+. replace QTR4=1 if QOB==4
+(265,133 real changes made)
+
+. 
+. ** Generate YOB*QOB dummies ********
+. gen QTR120= QTR1*YR20
+
+. gen QTR121= QTR1*YR21
+
+. gen QTR122= QTR1*YR22
+
+. gen QTR123= QTR1*YR23
+
+. gen QTR124= QTR1*YR24
+
+. gen QTR125= QTR1*YR25
+
+. gen QTR126= QTR1*YR26
+
+. gen QTR127= QTR1*YR27
+
+. gen QTR128= QTR1*YR28
+
+. gen QTR129= QTR1*YR29
+
+. 
+. gen QTR220= QTR2*YR20
+
+. gen QTR221= QTR2*YR21
+
+. gen QTR222= QTR2*YR22
+
+. gen QTR223= QTR2*YR23
+
+. gen QTR224= QTR2*YR24
+
+. gen QTR225= QTR2*YR25
+
+. gen QTR226= QTR2*YR26
+
+. gen QTR227= QTR2*YR27
+
+. gen QTR228= QTR2*YR28
+
+. gen QTR229= QTR2*YR29
+
+. 
+. gen QTR320= QTR3*YR20
+
+. gen QTR321= QTR3*YR21
+
+. gen QTR322= QTR3*YR22
+
+. gen QTR323= QTR3*YR23
+
+. gen QTR324= QTR3*YR24
+
+. gen QTR325= QTR3*YR25
+
+. gen QTR326= QTR3*YR26
+
+. gen QTR327= QTR3*YR27
+
+. gen QTR328= QTR3*YR28
+
+. gen QTR329= QTR3*YR29
+
+. 
+. 
+. keep if COHORT<20.30
+(816,435 observations deleted)
+
+. 
+. save "$outputpath/TableIV_Data.dta", replace
+file analysis/data/TableIV_Data.dta saved
+
+. 
+end of do-file
+
+. * ==============================================================================
+. *
+. * Title                         : AK91 Replication
+. * Aim                           : Data cleaning for Table IV
+. * Modified by           : Busra Canci
+. * Stata version         : 16
+. * Last modified         : 20230905
+. *
+. * ==============================================================================
+. 
+. set more off
+
+. clear all
+
+. 
+. global path "C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91"
+
+.         
+. cd "$path"
+C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91
+
+. 
+. global inputpath        "raw/data"
+
+. global outputpath       "analysis/data"
+
+.         
+. use "$inputpath/NEW7080.dta", clear
+
+.         
+. rename v1 AGE
+
+. rename v2 AGEQ
+
+. rename v4 EDUC
+
+. rename v5 ENOCENT
+
+. rename v6 ESOCENT
+
+. rename v9 LWKLYWGE
+
+. rename v10 MARRIED
+
+. rename v11 MIDATL
+
+. rename v12 MT
+
+. rename v13 NEWENG
+
+. rename v16 CENSUS
+
+. rename v18 QOB
+
+. rename v19 RACE
+
+. rename v20 SMSA
+
+. rename v21 SOATL
+
+. rename v24 WNOCENT
+
+. rename v25 WSOCENT
+
+. rename v27 YOB
+
+. drop v8
+
+. gen COHORT=20.29
+
+. replace COHORT=30.39 if YOB<=39 & YOB >=30
+(329,509 real changes made)
+
+. replace COHORT=40.49 if YOB<=49 & YOB >=40
+(486,926 real changes made)
+
+. replace AGEQ=AGEQ-1900 if CENSUS==80
+(816,435 real changes made)
+
+. gen AGEQSQ= AGEQ*AGEQ
+
+. 
+. ** Generate YOB dummies **********
+. gen YR20=0  
+
+. replace YR20=1 if YOB==1920  
+(23,725 real changes made)
+
+. replace YR20=1 if YOB==30 
+(33,602 real changes made)
+
+. replace YR20=1 if YOB==40 
+(38,218 real changes made)
+
+. gen YR21=0  
+
+. replace YR21=1 if YOB==1921  
+(24,978 real changes made)
+
+. replace YR21=1 if YOB==31
+(30,583 real changes made)
+
+. replace YR21=1 if YOB==41 
+(38,387 real changes made)
+
+. gen YR22=0  
+
+. replace YR22=1 if YOB==1922  
+(24,264 real changes made)
+
+. replace YR22=1 if YOB==32 
+(32,211 real changes made)
+
+. replace YR22=1 if YOB==42 
+(45,018 real changes made)
+
+. gen YR23=0  
+
+. replace YR23=1 if YOB==1923 
+(24,345 real changes made)
+
+. replace YR23=1 if YOB==33 
+(30,751 real changes made)
+
+. replace YR23=1 if YOB==43 
+(46,349 real changes made)
+
+. gen YR24=0  
+
+. replace YR24=1 if YOB==1924  
+(25,548 real changes made)
+
+. replace YR24=1 if YOB==34 
+(31,916 real changes made)
+
+. replace YR24=1 if YOB==44 
+(44,387 real changes made)
+
+. gen YR25=0  
+
+. replace YR25=1 if YOB==1925  
+(24,834 real changes made)
+
+. replace YR25=1 if YOB==35 
+(32,773 real changes made)
+
+. replace YR25=1 if YOB==45 
+(44,546 real changes made)
+
+. gen YR26=0  
+
+. replace YR26=1 if YOB==1926  
+(24,431 real changes made)
+
+. replace YR26=1 if YOB==36 
+(32,676 real changes made)
+
+. replace YR26=1 if YOB==46 
+(54,122 real changes made)
+
+. gen YR27=0  
+
+. replace YR27=1 if YOB==1927  
+(25,650 real changes made)
+
+. replace YR27=1 if YOB==37 
+(33,969 real changes made)
+
+. replace YR27=1 if YOB==47 
+(60,788 real changes made)
+
+. gen YR28=0  
+
+. replace YR28=1 if YOB==1928  
+(24,614 real changes made)
+
+. replace YR28=1 if YOB==38 
+(35,223 real changes made)
+
+. replace YR28=1 if YOB==48 
+(57,692 real changes made)
+
+. gen YR29=0  
+
+. replace YR29=1 if YOB==1929  
+(24,810 real changes made)
+
+. replace YR29=1 if YOB==39 
+(35,805 real changes made)
+
+. replace YR29=1 if YOB==49 
+(57,419 real changes made)
+
+. 
+. ** Generate QOB dummies ***********
+. gen QTR1=0
+
+. replace QTR1=1 if QOB==1
+(262,019 real changes made)
+
+. gen QTR2=0
+
+. replace QTR2=1 if QOB==2
+(255,733 real changes made)
+
+. gen QTR3=0
+
+. replace QTR3=1 if QOB==3
+(280,749 real changes made)
+
+. gen QTR4=0
+
+. replace QTR4=1 if QOB==4
+(265,133 real changes made)
+
+. 
+. ** Generate YOB*QOB dummies ********
+. gen QTR120= QTR1*YR20
+
+. gen QTR121= QTR1*YR21
+
+. gen QTR122= QTR1*YR22
+
+. gen QTR123= QTR1*YR23
+
+. gen QTR124= QTR1*YR24
+
+. gen QTR125= QTR1*YR25
+
+. gen QTR126= QTR1*YR26
+
+. gen QTR127= QTR1*YR27
+
+. gen QTR128= QTR1*YR28
+
+. gen QTR129= QTR1*YR29
+
+. 
+. gen QTR220= QTR2*YR20
+
+. gen QTR221= QTR2*YR21
+
+. gen QTR222= QTR2*YR22
+
+. gen QTR223= QTR2*YR23
+
+. gen QTR224= QTR2*YR24
+
+. gen QTR225= QTR2*YR25
+
+. gen QTR226= QTR2*YR26
+
+. gen QTR227= QTR2*YR27
+
+. gen QTR228= QTR2*YR28
+
+. gen QTR229= QTR2*YR29
+
+. 
+. gen QTR320= QTR3*YR20
+
+. gen QTR321= QTR3*YR21
+
+. gen QTR322= QTR3*YR22
+
+. gen QTR323= QTR3*YR23
+
+. gen QTR324= QTR3*YR24
+
+. gen QTR325= QTR3*YR25
+
+. gen QTR326= QTR3*YR26
+
+. gen QTR327= QTR3*YR27
+
+. gen QTR328= QTR3*YR28
+
+. gen QTR329= QTR3*YR29
+
+. 
+. keep if COHORT>30.00 & COHORT <30.40
+(734,125 observations deleted)
+
+. 
+. save "$outputpath/TableV_Data.dta", replace
+file analysis/data/TableV_Data.dta saved
+
+. 
+. 
+end of do-file
+
+. * ==============================================================================
+. *
+. * Title                         : AK91 Replication
+. * Aim                           : Data cleaning for Table IV
+. * Modified by           : Busra Canci
+. * Stata version         : 16
+. * Last modified         : 20230905
+. *
+. * ==============================================================================
+. 
+. set more off
+
+. clear all
+
+. 
+. global path "C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91"
+
+.         
+. cd "$path"
+C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91
+
+. 
+. global inputpath        "raw/data"
+
+. global outputpath       "analysis/data"
+
+.         
+. use "$inputpath/NEW7080.dta", clear
+
+.         
+. rename v1 AGE
+
+. rename v2 AGEQ
+
+. rename v4 EDUC
+
+. rename v5 ENOCENT
+
+. rename v6 ESOCENT
+
+. rename v9 LWKLYWGE
+
+. rename v10 MARRIED
+
+. rename v11 MIDATL
+
+. rename v12 MT
+
+. rename v13 NEWENG
+
+. rename v16 CENSUS
+
+. rename v18 QOB
+
+. rename v19 RACE
+
+. rename v20 SMSA
+
+. rename v21 SOATL
+
+. rename v24 WNOCENT
+
+. rename v25 WSOCENT
+
+. rename v27 YOB
+
+. drop v8
+
+. gen COHORT=20.29
+
+. replace COHORT=30.39 if YOB<=39 & YOB >=30
+(329,509 real changes made)
+
+. replace COHORT=40.49 if YOB<=49 & YOB >=40
+(486,926 real changes made)
+
+. replace AGEQ=AGEQ-1900 if CENSUS==80
+(816,435 real changes made)
+
+. gen AGEQSQ= AGEQ*AGEQ
+
+. 
+. ** Generate YOB dummies **********
+. gen YR20=0  
+
+. replace YR20=1 if YOB==1920  
+(23,725 real changes made)
+
+. replace YR20=1 if YOB==30 
+(33,602 real changes made)
+
+. replace YR20=1 if YOB==40 
+(38,218 real changes made)
+
+. gen YR21=0  
+
+. replace YR21=1 if YOB==1921  
+(24,978 real changes made)
+
+. replace YR21=1 if YOB==31
+(30,583 real changes made)
+
+. replace YR21=1 if YOB==41 
+(38,387 real changes made)
+
+. gen YR22=0  
+
+. replace YR22=1 if YOB==1922  
+(24,264 real changes made)
+
+. replace YR22=1 if YOB==32 
+(32,211 real changes made)
+
+. replace YR22=1 if YOB==42 
+(45,018 real changes made)
+
+. gen YR23=0  
+
+. replace YR23=1 if YOB==1923 
+(24,345 real changes made)
+
+. replace YR23=1 if YOB==33 
+(30,751 real changes made)
+
+. replace YR23=1 if YOB==43 
+(46,349 real changes made)
+
+. gen YR24=0  
+
+. replace YR24=1 if YOB==1924  
+(25,548 real changes made)
+
+. replace YR24=1 if YOB==34 
+(31,916 real changes made)
+
+. replace YR24=1 if YOB==44 
+(44,387 real changes made)
+
+. gen YR25=0  
+
+. replace YR25=1 if YOB==1925  
+(24,834 real changes made)
+
+. replace YR25=1 if YOB==35 
+(32,773 real changes made)
+
+. replace YR25=1 if YOB==45 
+(44,546 real changes made)
+
+. gen YR26=0  
+
+. replace YR26=1 if YOB==1926  
+(24,431 real changes made)
+
+. replace YR26=1 if YOB==36 
+(32,676 real changes made)
+
+. replace YR26=1 if YOB==46 
+(54,122 real changes made)
+
+. gen YR27=0  
+
+. replace YR27=1 if YOB==1927  
+(25,650 real changes made)
+
+. replace YR27=1 if YOB==37 
+(33,969 real changes made)
+
+. replace YR27=1 if YOB==47 
+(60,788 real changes made)
+
+. gen YR28=0  
+
+. replace YR28=1 if YOB==1928  
+(24,614 real changes made)
+
+. replace YR28=1 if YOB==38 
+(35,223 real changes made)
+
+. replace YR28=1 if YOB==48 
+(57,692 real changes made)
+
+. gen YR29=0  
+
+. replace YR29=1 if YOB==1929  
+(24,810 real changes made)
+
+. replace YR29=1 if YOB==39 
+(35,805 real changes made)
+
+. replace YR29=1 if YOB==49 
+(57,419 real changes made)
+
+. 
+. ** Generate QOB dummies ***********
+. gen QTR1=0
+
+. replace QTR1=1 if QOB==1
+(262,019 real changes made)
+
+. gen QTR2=0
+
+. replace QTR2=1 if QOB==2
+(255,733 real changes made)
+
+. gen QTR3=0
+
+. replace QTR3=1 if QOB==3
+(280,749 real changes made)
+
+. gen QTR4=0
+
+. replace QTR4=1 if QOB==4
+(265,133 real changes made)
+
+. 
+. ** Generate YOB*QOB dummies ********
+. gen QTR120= QTR1*YR20
+
+. gen QTR121= QTR1*YR21
+
+. gen QTR122= QTR1*YR22
+
+. gen QTR123= QTR1*YR23
+
+. gen QTR124= QTR1*YR24
+
+. gen QTR125= QTR1*YR25
+
+. gen QTR126= QTR1*YR26
+
+. gen QTR127= QTR1*YR27
+
+. gen QTR128= QTR1*YR28
+
+. gen QTR129= QTR1*YR29
+
+. 
+. gen QTR220= QTR2*YR20
+
+. gen QTR221= QTR2*YR21
+
+. gen QTR222= QTR2*YR22
+
+. gen QTR223= QTR2*YR23
+
+. gen QTR224= QTR2*YR24
+
+. gen QTR225= QTR2*YR25
+
+. gen QTR226= QTR2*YR26
+
+. gen QTR227= QTR2*YR27
+
+. gen QTR228= QTR2*YR28
+
+. gen QTR229= QTR2*YR29
+
+. 
+. gen QTR320= QTR3*YR20
+
+. gen QTR321= QTR3*YR21
+
+. gen QTR322= QTR3*YR22
+
+. gen QTR323= QTR3*YR23
+
+. gen QTR324= QTR3*YR24
+
+. gen QTR325= QTR3*YR25
+
+. gen QTR326= QTR3*YR26
+
+. gen QTR327= QTR3*YR27
+
+. gen QTR328= QTR3*YR28
+
+. gen QTR329= QTR3*YR29
+
+. 
+. 
+. keep if COHORT>40.00
+(576,708 observations deleted)
+
+. 
+. save "$outputpath/TableVI_Data.dta", replace
+file analysis/data/TableVI_Data.dta saved
+
+. 
+. 
+end of do-file
+
+.         
+.         ** ANALYSIS TO REPLICATE TABLES
+.         foreach x in IV V VI {
+  2.                 do "$analysis/Table `x'.do"
+  3.         }
+
+. * ==============================================================================
+. *
+. * Title                         : AK91 Replication
+. * Aim                           : Data cleaning for Table IV
+. * Modified by           : Busra Canci
+. * Stata version         : 16
+. * Last modified         : 20230905
+. *
+. * ==============================================================================
+. 
+. set more off
+
+. clear all
+
+. 
+. global path "C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91"
+
+.         
+. cd "$path"
+C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91
+
+. 
+.         global inputpath        "analysis/data" 
+
+.         global outputpath       "analysis/result"
+
+.         
+. 
+.         use "$inputpath/TableIV_Data.dta", clear
+
+. 
+.         
+.         ** Col 1 3 5 7 (OLS) ***
+.         eststo a1: qui reg LWKLYWGE EDUC YR20-YR28, robust
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+.         eststo a3: qui reg LWKLYWGE EDUC YR20-YR28 AGEQ AGEQSQ 
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+.         eststo a5: qui reg LWKLYWGE EDUC RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT YR20-YR28 
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+.         eststo a7: qui reg LWKLYWGE EDUC RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT YR20-YR28 AGEQ AGEQSQ
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+. 
+.         ** Col 2 4 6 8 (IV 2SLS) ***
+.         eststo a2: qui ivregress 2sls LWKLYWGE YR20-YR28 (EDUC = QTR120-QTR129 QTR220-QTR229 QTR320-QTR329), first robust
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         eststo a4: qui ivregress 2sls LWKLYWGE YR20-YR28 AGEQ AGEQSQ (EDUC = QTR120-QTR129 QTR220-QTR229 QTR320-QTR329), first robust
+Warning:  variance matrix is nonsymmetric or highly singular
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         eststo a6: qui ivregress 2sls LWKLYWGE YR20-YR28 RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT  (EDUC = QTR120-QTR129 QTR220-QTR22
+> 9 QTR320-QTR329), first robust
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         eststo a8: qui ivregress 2sls LWKLYWGE YR20-YR28 RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT AGEQ AGEQSQ (EDUC = QTR120-QTR129 Q
+> TR220-QTR229 QTR320-QTR329), first robust
+Warning:  variance matrix is nonsymmetric or highly singular
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         
+.         #d;
+delimiter now ;
+.         esttab a1 a2 a3 a4 a5 a6 a7 a8 using "$outputpath/TableIV.tex", order(EDUC RACE SMSA MARRIED AGEQ AGEQSQ) 
+>         keep(EDUC RACE SMSA MARRIED AGEQ AGEQSQ) 
+>         label  collabels(none) mlabels(, none) starlevels(* 0.10 ** 0.05 *** 0.01)  
+>         cells(b(fmt(3)) se(fmt(3) par)) style(tex) stats(N yobd rord chi2,  
+>         labels("Number of Observations" "9 year-of-birth dummies" "8 Region of residence dummies" "$\chi^2$")
+>         fmt(%9.0fc 3)) replace;
+(output written to analysis/result/TableIV.tex)
+
+.         # d cr  
+delimiter now cr
+.         eststo clear
+
+.         
+. 
+end of do-file
+
+. * ==============================================================================
+. *
+. * Title                         : AK91 Replication
+. * Aim                           : Data cleaning for Table IV
+. * Modified by           : Busra Canci
+. * Stata version         : 16
+. * Last modified         : 20230905
+. *
+. * ==============================================================================
+. 
+. set more off
+
+. clear all
+
+. 
+. global path "C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91"
+
+.         
+. cd "$path"
+C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91
+
+. 
+.         global inputpath        "analysis/data" 
+
+.         global outputpath       "analysis/result"
+
+.         
+. 
+.         use "$inputpath/TableIV_Data.dta", clear
+
+.         
+.         ** Col 1 3 5 7 (OLS) ***
+.         eststo a1: qui reg LWKLYWGE EDUC YR20-YR28, robust
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+.         eststo a3: qui reg LWKLYWGE EDUC YR20-YR28 AGEQ AGEQSQ 
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+.         eststo a5: qui reg LWKLYWGE EDUC RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT YR20-YR28 
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+.         eststo a7: qui reg LWKLYWGE EDUC RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT YR20-YR28 AGEQ AGEQSQ
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+. 
+.         ** Col 2 4 6 8 (IV 2SLS) ***
+.         eststo a2: qui ivregress 2sls LWKLYWGE YR20-YR28 (EDUC = QTR120-QTR129 QTR220-QTR229 QTR320-QTR329), first robust
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         eststo a4: qui ivregress 2sls LWKLYWGE YR20-YR28 AGEQ AGEQSQ (EDUC = QTR120-QTR129 QTR220-QTR229 QTR320-QTR329), first robust
+Warning:  variance matrix is nonsymmetric or highly singular
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         eststo a6: qui ivregress 2sls LWKLYWGE YR20-YR28 RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT  (EDUC = QTR120-QTR129 QTR220-QTR22
+> 9 QTR320-QTR329), first robust
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         eststo a8: qui ivregress 2sls LWKLYWGE YR20-YR28 RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT AGEQ AGEQSQ (EDUC = QTR120-QTR129 Q
+> TR220-QTR229 QTR320-QTR329), first robust
+Warning:  variance matrix is nonsymmetric or highly singular
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         
+.         #d;
+delimiter now ;
+.         esttab a1 a2 a3 a4 a5 a6 a7 a8 using "$outputpath/TableV.tex", order(EDUC RACE SMSA MARRIED AGEQ AGEQSQ) 
+>         keep(EDUC RACE SMSA MARRIED AGEQ AGEQSQ) 
+>         label  collabels(none) mlabels(, none) starlevels(* 0.10 ** 0.05 *** 0.01)  
+>         cells(b(fmt(3)) se(fmt(3) par)) style(tex) stats(N yobd rord chi2,  
+>         labels("Number of Observations" "9 year-of-birth dummies" "8 Region of residence dummies" "$\chi^2$")
+>         fmt(%9.0fc 3)) replace;
+(output written to analysis/result/TableV.tex)
+
+.         # d cr  
+delimiter now cr
+.         eststo clear
+
+.         
+.         
+. 
+end of do-file
+
+. * ==============================================================================
+. *
+. * Title                         : AK91 Replication
+. * Aim                           : Data cleaning for Table IV
+. * Modified by           : Busra Canci
+. * Stata version         : 16
+. * Last modified         : 20230905
+. *
+. * ==============================================================================
+. 
+. set more off
+
+. clear all
+
+. 
+. global path "C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91"
+
+.         
+. cd "$path"
+C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91
+
+. 
+.         global inputpath        "analysis/data" 
+
+.         global outputpath       "analysis/result"
+
+.         
+. 
+.         use "$inputpath/TableIV_Data.dta", clear
+
+.         
+.         ** Col 1 3 5 7 (OLS) ***
+.         eststo a1: qui reg LWKLYWGE EDUC YR20-YR28, robust
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+.         eststo a3: qui reg LWKLYWGE EDUC YR20-YR28 AGEQ AGEQSQ 
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+.         eststo a5: qui reg LWKLYWGE EDUC RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT YR20-YR28 
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+.         eststo a7: qui reg LWKLYWGE EDUC RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT YR20-YR28 AGEQ AGEQSQ
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "No"
+
+added macro:
+               e(rord) : "No"
+
+. 
+.         ** Col 2 4 6 8 (IV 2SLS) ***
+.         eststo a2: qui ivregress 2sls LWKLYWGE YR20-YR28 (EDUC = QTR120-QTR129 QTR220-QTR229 QTR320-QTR329), first robust
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         eststo a4: qui ivregress 2sls LWKLYWGE YR20-YR28 AGEQ AGEQSQ (EDUC = QTR120-QTR129 QTR220-QTR229 QTR320-QTR329), first robust
+Warning:  variance matrix is nonsymmetric or highly singular
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         eststo a6: qui ivregress 2sls LWKLYWGE YR20-YR28 RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT  (EDUC = QTR120-QTR129 QTR220-QTR22
+> 9 QTR320-QTR329), first robust
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         eststo a8: qui ivregress 2sls LWKLYWGE YR20-YR28 RACE MARRIED SMSA NEWENG MIDATL ENOCENT WNOCENT SOATL ESOCENT WSOCENT MT AGEQ AGEQSQ (EDUC = QTR120-QTR129 Q
+> TR220-QTR229 QTR320-QTR329), first robust
+Warning:  variance matrix is nonsymmetric or highly singular
+
+.         estadd local yobd "Yes"
+
+added macro:
+               e(yobd) : "Yes"
+
+.         estadd local rord "Yes"
+
+added macro:
+               e(rord) : "Yes"
+
+.         
+.         #d;
+delimiter now ;
+.         esttab a1 a2 a3 a4 a5 a6 a7 a8 using "$outputpath/TableVI.tex", order(EDUC RACE SMSA MARRIED AGEQ AGEQSQ) 
+>         keep(EDUC RACE SMSA MARRIED AGEQ AGEQSQ) 
+>         label  collabels(none) mlabels(, none) starlevels(* 0.10 ** 0.05 *** 0.01)  
+>         cells(b(fmt(3)) se(fmt(3) par)) style(tex) stats(N yobd rord chi2,  
+>         labels("Number of Observations" "9 year-of-birth dummies" "8 Region of residence dummies" "$\chi^2$")
+>         fmt(%9.0fc 3)) replace;
+(output written to analysis/result/TableVI.tex)
+
+.         # d cr  
+delimiter now cr
+.         eststo clear
+
+.         
+.         
+. 
+end of do-file
+
+.         
+.         *** END OF DO FILE ***
+.         
+.         log close 
+      name:  <unnamed>
+       log:  C:\Users\buca4591\Desktop\2nd year\applied\ps1\AK91\communications/logs/AK91_Replication.log
+  log type:  text
+ closed on:   5 Sep 2023, 17:20:02
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
