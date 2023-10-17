@@ -118,7 +118,7 @@ word_plot <- wordlist %>%
   coord_flip()
 
 # Save the word frequency graph
-ggsave(filename = "Analysis/Output/word_freq.png", plot = word_plot)
+ggsave(filename = "analysis/output/word_freq.png", plot = word_graph)
 
 # Plot bigram frequency graph
 bigram_plot <- bigramlist %>%
@@ -130,7 +130,7 @@ bigram_plot <- bigramlist %>%
   coord_flip()
 
 # Save the bigram frequency graph
-ggsave(filename = "Analysis/Output/bigram_freq.png", plot = bigram_plot)
+ggsave(filename = "analysis/output/bigram_freq.png", plot = bigram_graph)
 
 # Plot and save trigram frequency graph ordered by frequency
 trigram_plot <- trigramlist %>%
@@ -143,13 +143,8 @@ trigram_plot <- trigramlist %>%
   coord_flip()
 
 # Save the trigram frequency graph
-ggsave(filename = "Analysis/Output/trigram_freq.png", plot = trigram_plot)
+ggsave(filename = "analysis/output/trigram_freq.png", plot = trigram_graph)
 
-# Most common word: president. Most common bigram: unanimous consent. Most common trigram: word war II.
-
-#Merge in party information
-# Compute frequency lists for bigrams and trigrams by party.
-  
 # Frequency list of words by party
   wordlist_party = senators_td105 %>% 
   inner_join(sen105_party_) %>%
@@ -181,6 +176,7 @@ wordlist_party %>%
   comparison.cloud(colors = c("#00FF00", "#545454"), 
                    max.words = 100,
                    random.order=FALSE)
+ggsave(filename = "analysis/output/wordcloud_by_party.png", plot = wordlist_graph)
 
 # Step 1: Compute bigram freuency, by senator
 bigramfreq_s = senators_bigram %>% 
