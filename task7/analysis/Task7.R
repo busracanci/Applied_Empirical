@@ -118,7 +118,7 @@ word_plot <- wordlist %>%
   coord_flip()
 
 # Save the word frequency graph
-ggsave(filename = "analysis/output/word_freq.png", plot = word_graph)
+ggsave(filename = "analysis/output/word_freq.png", plot = word_plot)
 
 # Plot bigram frequency graph
 bigram_plot <- bigramlist %>%
@@ -130,7 +130,7 @@ bigram_plot <- bigramlist %>%
   coord_flip()
 
 # Save the bigram frequency graph
-ggsave(filename = "analysis/output/bigram_freq.png", plot = bigram_graph)
+ggsave(filename = "analysis/output/bigram_freq.png", plot = bigram_plot)
 
 # Plot and save trigram frequency graph ordered by frequency
 trigram_plot <- trigramlist %>%
@@ -143,7 +143,7 @@ trigram_plot <- trigramlist %>%
   coord_flip()
 
 # Save the trigram frequency graph
-ggsave(filename = "analysis/output/trigram_freq.png", plot = trigram_graph)
+ggsave(filename = "analysis/output/trigram_freq.png", plot = trigram_plot)
 
 # Frequency list of words by party
   wordlist_party = senators_td105 %>% 
@@ -176,7 +176,6 @@ wordlist_party %>%
   comparison.cloud(colors = c("#00FF00", "#545454"), 
                    max.words = 100,
                    random.order=FALSE)
-ggsave(filename = "analysis/output/wordcloud_by_party.png", plot = wordlist_graph)
 
 # Step 1: Compute bigram freuency, by senator
 bigramfreq_s = senators_bigram %>% 
